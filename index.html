@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google Ads Budget Estimator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f8f9fa;
+    color: #202124;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+
+  #app {
+    width: 100%;
+    max-width: 640px;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+    text-align: center;
+    margin-bottom: 8px;
+    color: #1a73e8;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #5f6368;
+    margin-bottom: 32px;
+    font-size: 0.95rem;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 32px;
+    align-items: center;
+  }
+  .progress-dot {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; font-weight: 600;
+    border: 2px solid #dadce0;
+    color: #5f6368;
+    background: #fff;
+    transition: all 0.3s ease;
+  }
+  .progress-dot.active {
+    border-color: #1a73e8;
+    background: #1a73e8;
+    color: #fff;
+  }
+  .progress-dot.completed {
+    border-color: #34a853;
+    background: #34a853;
+    color: #fff;
+  }
+  .progress-line {
+    width: 48px; height: 2px;
+    background: #dadce0;
+    transition: background 0.3s ease;
+  }
+  .progress-line.filled { background: #34a853; }
+
+  /* Card */
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    padding: 32px;
+  }
+
+  .step-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+
+  /* Form fields */
+  .field {
+    margin-bottom: 20px;
+  }
+  .field label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #5f6368;
+    margin-bottom: 6px;
+  }
+  .field select,
+  .field input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #202124;
+    background: #fff;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+  .field select { cursor: pointer; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235f6368' d='M2 4l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 12px center; padding-right: 36px; }
+  .field input:focus,
+  .field select:focus {
+    outline: none;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 2px rgba(26,115,232,0.15);
+  }
+  .field .hint {
+    font-size: 0.8rem;
+    color: #80868b;
+    margin-top: 4px;
+  }
+  .field .error-msg {
+    font-size: 0.8rem;
+    color: #ea4335;
+    margin-top: 4px;
+    display: none;
+  }
+  .field.invalid input,
+  .field.invalid select {
+    border-color: #ea4335;
+  }
+  .field.invalid .error-msg { display: block; }
+
+  .input-prefix {
+    position: relative;
+  }
+  .input-prefix::before {
+    content: '$';
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: #5f6368;
+    font-size: 1rem;
+  }
+  .input-prefix input { padding-left: 24px; }
+
+  /* Buttons */
+  .btn-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 28px;
+    gap: 12px;
+  }
+  .btn {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: #1a73e8;
+    color: #fff;
+    margin-left: auto;
+  }
+  .btn-primary:hover { background: #1557b0; }
+  .btn-secondary {
+    background: #f1f3f4;
+    color: #5f6368;
+  }
+  .btn-secondary:hover { background: #e8eaed; }
+
+  /* Step visibility */
+  .wizard-step { display: none; }
+  .wizard-step.active { display: block; }
+
+  /* Results */
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .result-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+  }
+  .result-card .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a73e8;
+  }
+  .result-card .label {
+    font-size: 0.8rem;
+    color: #5f6368;
+    margin-top: 4px;
+  }
+  .result-card.highlight {
+    background: #e8f0fe;
+    grid-column: 1 / -1;
+  }
+  .result-card.highlight .value {
+    font-size: 2rem;
+    color: #1a73e8;
+  }
+
+  .tier-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .tier-tab {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #dadce0;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .tier-tab.active {
+    border-color: #1a73e8;
+    background: #e8f0fe;
+    color: #1a73e8;
+  }
+  .tier-tab .tier-amount {
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: block;
+    margin-top: 4px;
+  }
+
+  .reality-checks {
+    margin-top: 24px;
+    padding: 16px;
+    background: #fef7e0;
+    border-radius: 8px;
+    border-left: 4px solid #f9ab00;
+  }
+  .reality-checks h3 {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    color: #e37400;
+  }
+  .reality-check-item {
+    font-size: 0.85rem;
+    color: #5f6368;
+    margin-bottom: 6px;
+    padding-left: 20px;
+    position: relative;
+  }
+  .reality-check-item::before {
+    content: '⚠';
+    position: absolute;
+    left: 0;
+  }
+  .reality-check-item.info::before { content: 'ℹ'; }
+
+  .recommendations {
+    margin-top: 20px;
+  }
+  .recommendations h3 {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+  }
+  .recommendations ul {
+    padding-left: 20px;
+    font-size: 0.875rem;
+    color: #5f6368;
+  }
+  .recommendations li { margin-bottom: 6px; }
+
+  .disclaimer {
+    margin-top: 20px;
+    font-size: 0.75rem;
+    color: #80868b;
+    text-align: center;
+    font-style: italic;
+  }
+
+  @media (max-width: 600px) {
+    .card { padding: 20px; }
+    .result-grid { grid-template-columns: 1fr; }
+    .tier-tabs { flex-direction: column; }
+    h1 { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>Google Ads Budget Estimator</h1>
+  <p class="subtitle">Get a data-driven budget recommendation in 3 steps</p>
+
+  <div class="progress-bar">
+    <div class="progress-dot active" id="dot-1">1</div>
+    <div class="progress-line" id="line-1"></div>
+    <div class="progress-dot" id="dot-2">2</div>
+    <div class="progress-line" id="line-2"></div>
+    <div class="progress-dot" id="dot-3">3</div>
+  </div>
+
+  <!-- Step 1: Business Profile -->
+  <div class="wizard-step active" id="step-1">
+    <div class="card">
+      <div class="step-title">Business Profile</div>
+
+      <div class="field">
+        <label for="industry">Industry</label>
+        <select id="industry">
+          <option value="">Select your industry...</option>
+          <option value="legal">Legal Services</option>
+          <option value="dental">Dental Services</option>
+          <option value="home_improvement">Home &amp; Home Improvement</option>
+          <option value="education">Education &amp; Instruction</option>
+          <option value="finance">Finance &amp; Insurance</option>
+          <option value="healthcare">Healthcare / Physicians</option>
+          <option value="automotive">Automotive (Repair/Parts)</option>
+          <option value="real_estate">Real Estate</option>
+          <option value="ecommerce">E-commerce / Retail</option>
+          <option value="saas">SaaS / Technology</option>
+          <option value="travel">Travel &amp; Hospitality</option>
+          <option value="restaurants">Restaurants &amp; Food</option>
+          <option value="beauty">Beauty &amp; Personal Care</option>
+          <option value="fitness">Sports, Fitness &amp; Recreation</option>
+          <option value="arts">Arts &amp; Entertainment</option>
+        </select>
+        <div class="error-msg">Please select an industry.</div>
+      </div>
+
+      <div class="field">
+        <label for="revenue">Monthly Revenue</label>
+        <div class="input-prefix">
+          <input type="number" id="revenue" placeholder="e.g. 50000" min="0">
+        </div>
+        <div class="hint">Your average monthly business revenue.</div>
+        <div class="error-msg">Please enter a positive number.</div>
+      </div>
+
+      <div class="field">
+        <label for="aov">Average Order Value</label>
+        <div class="input-prefix">
+          <input type="number" id="aov" placeholder="e.g. 150" min="0">
+        </div>
+        <div class="hint">Average revenue per customer transaction.</div>
+        <div class="error-msg">Please enter a positive number.</div>
+      </div>
+
+      <div class="field">
+        <label for="ltv">Customer Lifetime Value</label>
+        <div class="input-prefix">
+          <input type="number" id="ltv" placeholder="e.g. 500" min="0">
+        </div>
+        <div class="hint">Total expected revenue from one customer over time.</div>
+        <div class="error-msg">Please enter a positive number.</div>
+      </div>
+
+      <div class="field">
+        <label for="current-spend">Current Monthly Ad Spend</label>
+        <div class="input-prefix">
+          <input type="number" id="current-spend" placeholder="0 if none" min="0" value="0">
+        </div>
+        <div class="error-msg">Please enter 0 or a positive number.</div>
+      </div>
+
+      <div class="field">
+        <label for="cvr">Website Conversion Rate (%)</label>
+        <input type="number" id="cvr" placeholder="Leave blank to use industry average" min="0" max="100" step="0.1">
+        <div class="hint">% of visitors who convert. Leave blank to use industry average.</div>
+      </div>
+
+      <div class="field">
+        <label for="sales-cycle">Sales Cycle Length</label>
+        <select id="sales-cycle">
+          <option value="immediate">Immediate</option>
+          <option value="1-7days">1–7 days</option>
+          <option value="1-4weeks" selected>1–4 weeks</option>
+          <option value="1-3months">1–3 months</option>
+          <option value="3+months">3+ months</option>
+        </select>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="goToStep(2)">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Campaign Goals -->
+  <div class="wizard-step" id="step-2">
+    <div class="card">
+      <div class="step-title">Campaign Goals</div>
+
+      <div class="field">
+        <label>Primary Goal</label>
+        <div class="goal-options" id="goal-options">
+          <label class="goal-option">
+            <input type="radio" name="goal" value="leads" checked>
+            <span>Lead Generation</span>
+          </label>
+          <label class="goal-option">
+            <input type="radio" name="goal" value="transactions">
+            <span>Sales / Transactions</span>
+          </label>
+          <label class="goal-option">
+            <input type="radio" name="goal" value="traffic">
+            <span>Website Traffic</span>
+          </label>
+          <label class="goal-option">
+            <input type="radio" name="goal" value="awareness">
+            <span>Brand Awareness</span>
+          </label>
+        </div>
+        <style>
+          .goal-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+          .goal-option {
+            display: flex; align-items: center; gap: 8px;
+            padding: 12px; border: 2px solid #dadce0; border-radius: 8px;
+            cursor: pointer; transition: all 0.2s; font-size: 0.9rem;
+          }
+          .goal-option:has(input:checked) { border-color: #1a73e8; background: #e8f0fe; }
+          .goal-option input { accent-color: #1a73e8; }
+          @media (max-width: 600px) { .goal-options { grid-template-columns: 1fr; } }
+        </style>
+      </div>
+
+      <div class="field">
+        <label for="target-outcome" id="target-label">Target leads per month</label>
+        <input type="number" id="target-outcome" placeholder="e.g. 50" min="1">
+        <div class="error-msg">Please enter a positive number.</div>
+      </div>
+
+      <div class="field" id="cpa-field">
+        <label for="target-cpa">Target Cost Per Acquisition (optional)</label>
+        <div class="input-prefix">
+          <input type="number" id="target-cpa" placeholder="Leave blank for estimate" min="0">
+        </div>
+        <div class="hint">Max you'd pay per lead/sale. We'll estimate if left blank.</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goToStep(1)">Back</button>
+        <button class="btn btn-primary" onclick="goToStep(3)">Calculate Budget</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Results -->
+  <div class="wizard-step" id="step-3">
+    <div class="card" id="results-card">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+</div>
+
+<script>
+const INDUSTRY_DATA = {
+  legal:            { label:"Legal Services",              avgCPC:8.58, avgCTR:4.76, avgCVR:7.10, avgCPL:131.63, avgROAS:2.5, adSpendPct:0.08 },
+  dental:           { label:"Dental Services",             avgCPC:7.85, avgCTR:5.90, avgCVR:8.50, avgCPL:92.00,  avgROAS:3.0, adSpendPct:0.08 },
+  home_improvement: { label:"Home & Home Improvement",     avgCPC:7.85, avgCTR:5.50, avgCVR:7.00, avgCPL:112.00, avgROAS:2.8, adSpendPct:0.07 },
+  education:        { label:"Education & Instruction",     avgCPC:6.23, avgCTR:6.20, avgCVR:6.50, avgCPL:95.00,  avgROAS:3.0, adSpendPct:0.10 },
+  finance:          { label:"Finance & Insurance",         avgCPC:5.90, avgCTR:6.10, avgCVR:5.50, avgCPL:107.00, avgROAS:2.5, adSpendPct:0.09 },
+  healthcare:       { label:"Healthcare / Physicians",     avgCPC:5.50, avgCTR:6.70, avgCVR:11.60,avgCPL:47.00,  avgROAS:3.5, adSpendPct:0.06 },
+  automotive:       { label:"Automotive (Repair/Parts)",   avgCPC:3.20, avgCTR:8.10, avgCVR:14.70,avgCPL:21.80,  avgROAS:4.0, adSpendPct:0.07 },
+  real_estate:      { label:"Real Estate",                 avgCPC:2.80, avgCTR:9.10, avgCVR:5.00, avgCPL:56.00,  avgROAS:2.5, adSpendPct:0.10 },
+  ecommerce:        { label:"E-commerce / Retail",         avgCPC:2.50, avgCTR:6.60, avgCVR:4.50, avgCPL:55.50,  avgROAS:4.0, adSpendPct:0.12 },
+  saas:             { label:"SaaS / Technology",           avgCPC:5.00, avgCTR:5.80, avgCVR:3.50, avgCPL:143.00, avgROAS:3.0, adSpendPct:0.12 },
+  travel:           { label:"Travel & Hospitality",        avgCPC:2.12, avgCTR:7.80, avgCVR:5.20, avgCPL:40.80,  avgROAS:4.5, adSpendPct:0.08 },
+  restaurants:      { label:"Restaurants & Food",          avgCPC:2.05, avgCTR:7.50, avgCVR:8.80, avgCPL:23.30,  avgROAS:5.0, adSpendPct:0.06 },
+  beauty:           { label:"Beauty & Personal Care",      avgCPC:3.50, avgCTR:6.40, avgCVR:6.80, avgCPL:51.50,  avgROAS:3.5, adSpendPct:0.08 },
+  fitness:          { label:"Sports, Fitness & Recreation", avgCPC:2.50, avgCTR:7.80, avgCVR:7.50, avgCPL:33.30, avgROAS:4.0, adSpendPct:0.07 },
+  arts:             { label:"Arts & Entertainment",        avgCPC:1.60, avgCTR:10.00,avgCVR:6.30, avgCPL:25.40,  avgROAS:5.0, adSpendPct:0.06 }
+};
+
+// State
+let currentStep = 1;
+
+// Goal label updater
+document.querySelectorAll('input[name="goal"]').forEach(r => {
+  r.addEventListener('change', () => {
+    const labels = { leads:'Target leads per month', transactions:'Target sales per month', traffic:'Target monthly visitors', awareness:'Target monthly impressions' };
+    document.getElementById('target-label').textContent = labels[r.value] || labels.leads;
+    document.getElementById('cpa-field').style.display = (r.value==='leads'||r.value==='transactions') ? '' : 'none';
+  });
+});
+
+function goToStep(step) {
+  if (step === 2 && !validateStep1()) return;
+  if (step === 3 && !validateStep2()) return;
+  if (step === 3) renderResults();
+
+  document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-' + step).classList.add('active');
+
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById('dot-' + i);
+    dot.className = 'progress-dot' + (i === step ? ' active' : (i < step ? ' completed' : ''));
+    dot.textContent = i < step ? '✓' : i;
+  }
+  document.getElementById('line-1').className = 'progress-line' + (step > 1 ? ' filled' : '');
+  document.getElementById('line-2').className = 'progress-line' + (step > 2 ? ' filled' : '');
+  currentStep = step;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function setInvalid(id, invalid) {
+  document.getElementById(id).closest('.field').classList.toggle('invalid', invalid);
+  return !invalid;
+}
+
+function validateStep1() {
+  let ok = true;
+  if (!document.getElementById('industry').value) { setInvalid('industry', true); ok = false; } else setInvalid('industry', false);
+  const rev = Number(document.getElementById('revenue').value);
+  if (!rev || rev <= 0) { setInvalid('revenue', true); ok = false; } else setInvalid('revenue', false);
+  const aov = Number(document.getElementById('aov').value);
+  if (!aov || aov <= 0) { setInvalid('aov', true); ok = false; } else setInvalid('aov', false);
+  const ltv = Number(document.getElementById('ltv').value);
+  if (!ltv || ltv <= 0) { setInvalid('ltv', true); ok = false; } else setInvalid('ltv', false);
+  return ok;
+}
+
+function validateStep2() {
+  const target = Number(document.getElementById('target-outcome').value);
+  if (!target || target <= 0) { setInvalid('target-outcome', true); return false; }
+  setInvalid('target-outcome', false);
+  return true;
+}
+
+function getState() {
+  return {
+    industry: document.getElementById('industry').value,
+    revenue: Number(document.getElementById('revenue').value),
+    aov: Number(document.getElementById('aov').value),
+    ltv: Number(document.getElementById('ltv').value),
+    currentSpend: Number(document.getElementById('current-spend').value) || 0,
+    cvr: Number(document.getElementById('cvr').value) || 0,
+    salesCycle: document.getElementById('sales-cycle').value,
+    goal: document.querySelector('input[name="goal"]:checked').value,
+    targetOutcome: Number(document.getElementById('target-outcome').value),
+    targetCPA: Number(document.getElementById('target-cpa').value) || 0
+  };
+}
+
+function calculateBudget(state) {
+  const ind = INDUSTRY_DATA[state.industry];
+  const cvr = state.cvr > 0 ? state.cvr : ind.avgCVR;
+
+  // Method 1: Goal-backward
+  let goalBudget;
+  if (state.goal === 'awareness') {
+    const cpm = ind.avgCPC * (ind.avgCTR / 100) * 1000;
+    goalBudget = (state.targetOutcome / 1000) * cpm;
+  } else if (state.goal === 'traffic') {
+    goalBudget = state.targetOutcome * ind.avgCPC;
+  } else {
+    const neededClicks = state.targetOutcome / (cvr / 100);
+    goalBudget = neededClicks * ind.avgCPC;
+  }
+
+  // Method 2: Revenue percentage
+  const revBudget = state.revenue * ind.adSpendPct;
+
+  // Method 3: Competitive (CPL-based)
+  const compBudget = state.targetOutcome * ind.avgCPL;
+
+  // Blend
+  let recommended = goalBudget * 0.6 + revBudget * 0.25 + compBudget * 0.15;
+
+  // Floor: 10 clicks/day minimum
+  const floor = ind.avgCPC * 10 * 30;
+  recommended = Math.max(recommended, floor);
+
+  // Ceiling: 30% of revenue for safety
+  const ceiling = state.revenue * 0.30;
+  if (recommended > ceiling) recommended = ceiling;
+
+  return {
+    recommended: Math.round(recommended),
+    conservative: Math.round(recommended * 0.6),
+    aggressive: Math.round(recommended * 1.5)
+  };
+}
+
+function projectMetrics(budget, state) {
+  const ind = INDUSTRY_DATA[state.industry];
+  const cvr = state.cvr > 0 ? state.cvr : ind.avgCVR;
+  const clicks = budget / ind.avgCPC;
+  const impressions = clicks / (ind.avgCTR / 100);
+  const conversions = clicks * (cvr / 100);
+  const cpa = conversions > 0 ? budget / conversions : 0;
+  const revenue = conversions * state.aov;
+  const roas = budget > 0 ? revenue / budget : 0;
+  const ltvRevenue = conversions * state.ltv;
+  const ltvRoas = budget > 0 ? ltvRevenue / budget : 0;
+  return { clicks: Math.round(clicks), impressions: Math.round(impressions), conversions: Math.round(conversions), cpa: Math.round(cpa), revenue: Math.round(revenue), roas: roas.toFixed(1), ltvRevenue: Math.round(ltvRevenue), ltvRoas: ltvRoas.toFixed(1) };
+}
+
+function realityCheck(state, proj) {
+  const ind = INDUSTRY_DATA[state.industry];
+  const checks = [];
+  if (state.targetCPA > 0 && state.targetCPA < ind.avgCPL * 0.5)
+    checks.push({ type:'warning', msg:'Your target CPA ($'+state.targetCPA+') is well below the industry average ($'+ind.avgCPL.toFixed(0)+'). This may be hard to achieve without strong conversion optimization.' });
+  if (proj.conversions < 50)
+    checks.push({ type:'info', msg:'At this budget, expect ~'+proj.conversions+' conversions/month. Google typically needs 30–50+ conversions to optimize automated bidding effectively.' });
+  if (state.cvr > 0 && state.cvr > ind.avgCVR * 2)
+    checks.push({ type:'info', msg:'Your conversion rate ('+state.cvr+'%) is well above the industry average ('+ind.avgCVR+'%). Projections assume this holds for paid traffic.' });
+  if (state.salesCycle === '1-3months' || state.salesCycle === '3+months')
+    checks.push({ type:'info', msg:'With a longer sales cycle, expect ROI to take 2–4 months to materialize. Budget for at least 3 months before evaluating.' });
+  return checks;
+}
+
+function fmt(n) {
+  return n.toLocaleString('en-US');
+}
+
+function renderResults() {
+  const state = getState();
+  const budgets = calculateBudget(state);
+  const ind = INDUSTRY_DATA[state.industry];
+  const tiers = { conservative: budgets.conservative, recommended: budgets.recommended, aggressive: budgets.aggressive };
+
+  let proj = projectMetrics(budgets.recommended, state);
+  const checks = realityCheck(state, proj);
+  const recs = getRecommendations(state, proj, ind);
+
+  const container = document.getElementById('results-card');
+  container.innerHTML = `
+    <div class="step-title">Your Budget Recommendation</div>
+    <div class="tier-tabs">
+      <div class="tier-tab" data-tier="conservative" onclick="selectTier(this)">Conservative<span class="tier-amount">$${fmt(tiers.conservative)}/mo</span></div>
+      <div class="tier-tab active" data-tier="recommended" onclick="selectTier(this)">Recommended<span class="tier-amount">$${fmt(tiers.recommended)}/mo</span></div>
+      <div class="tier-tab" data-tier="aggressive" onclick="selectTier(this)">Aggressive<span class="tier-amount">$${fmt(tiers.aggressive)}/mo</span></div>
+    </div>
+    <div class="result-card highlight">
+      <div class="value" id="res-budget">$${fmt(budgets.recommended)}<span style="font-size:0.9rem;font-weight:400">/month</span></div>
+      <div class="label">Recommended Monthly Budget &middot; $${fmt(Math.round(budgets.recommended/30))}/day</div>
+    </div>
+    <div class="result-grid" id="metrics-grid">
+      <div class="result-card"><div class="value" id="res-clicks">${fmt(proj.clicks)}</div><div class="label">Est. Monthly Clicks</div></div>
+      <div class="result-card"><div class="value" id="res-conversions">${fmt(proj.conversions)}</div><div class="label">Est. Conversions</div></div>
+      <div class="result-card"><div class="value" id="res-cpa">$${fmt(proj.cpa)}</div><div class="label">Est. Cost Per Acquisition</div></div>
+      <div class="result-card"><div class="value" id="res-roas">${proj.roas}x</div><div class="label">Est. ROAS</div></div>
+      <div class="result-card"><div class="value" id="res-revenue">$${fmt(proj.revenue)}</div><div class="label">Est. Monthly Revenue</div></div>
+      <div class="result-card"><div class="value" id="res-ltv-roas">${proj.ltvRoas}x</div><div class="label">LTV-Adjusted ROAS</div></div>
+    </div>
+    ${checks.length ? `<div class="reality-checks"><h3>Reality Check</h3>${checks.map(c=>'<div class="reality-check-item '+c.type+'">'+c.msg+'</div>').join('')}</div>` : ''}
+    ${recs.length ? `<div class="recommendations"><h3>Recommendations</h3><ul>${recs.map(r=>'<li>'+r+'</li>').join('')}</ul></div>` : ''}
+    <p class="disclaimer">Estimates based on 2025 industry benchmarks. Actual results vary based on ad quality, landing pages, competition, and seasonality.</p>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goToStep(1)">Start Over</button>
+      <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
+    </div>
+  `;
+
+  // Store tiers for switching
+  window._tiers = tiers;
+  window._state = state;
+}
+
+function selectTier(el) {
+  document.querySelectorAll('.tier-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const budget = window._tiers[el.dataset.tier];
+  const proj = projectMetrics(budget, window._state);
+  document.getElementById('res-budget').innerHTML = '$'+fmt(budget)+'<span style="font-size:0.9rem;font-weight:400">/month</span>';
+  document.getElementById('res-clicks').textContent = fmt(proj.clicks);
+  document.getElementById('res-conversions').textContent = fmt(proj.conversions);
+  document.getElementById('res-cpa').textContent = '$'+fmt(proj.cpa);
+  document.getElementById('res-roas').textContent = proj.roas+'x';
+  document.getElementById('res-revenue').textContent = '$'+fmt(proj.revenue);
+  document.getElementById('res-ltv-roas').textContent = proj.ltvRoas+'x';
+}
+
+function getRecommendations(state, proj, ind) {
+  const recs = [];
+  const cvr = state.cvr > 0 ? state.cvr : ind.avgCVR;
+  if (cvr < ind.avgCVR) recs.push('Your conversion rate is below average. Improve landing pages before scaling spend.');
+  if (state.goal === 'awareness') recs.push('Consider Display + YouTube campaigns alongside Search for maximum reach.');
+  if (proj.conversions < 30) recs.push('Start with exact-match keywords to maximize relevance per dollar at this budget level.');
+  if (state.salesCycle === '1-3months' || state.salesCycle === '3+months') recs.push('Use remarketing lists to stay in front of prospects during your longer sales cycle.');
+  if (state.currentSpend === 0) recs.push('As a new advertiser, start with the conservative budget for 2–4 weeks, then scale up based on results.');
+  if (proj.roas < 1) recs.push('Projected first-purchase ROAS is below 1x. Focus on LTV — ensure repeat purchases justify the acquisition cost.');
+  if (recs.length === 0) recs.push('Your profile looks solid. Start with the recommended budget and review performance after 30 days.');
+  return recs;
+}
+</script>
+</body>
+</html>
