@@ -288,11 +288,82 @@
     font-style: italic;
   }
 
+  /* Budget constraint toggle */
+  .budget-toggle {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 8px; margin-bottom: 16px;
+  }
+  .budget-toggle input[type="checkbox"] {
+    width: 18px; height: 18px; accent-color: #1a73e8; cursor: pointer;
+  }
+  .budget-toggle label { font-size: 0.875rem; color: #5f6368; cursor: pointer; }
+  .budget-max-field { display: none; margin-bottom: 20px; }
+  .budget-max-field.visible { display: block; }
+
+  /* Achievable section */
+  .achievable-section {
+    margin-top: 24px; padding: 20px;
+    background: #fce8e6; border-radius: 8px; border-left: 4px solid #ea4335;
+  }
+  .achievable-section h3 { font-size: 0.95rem; color: #c5221f; margin-bottom: 12px; }
+  .achievable-section .achievable-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  .achievable-section .achievable-card {
+    background: #fff; border-radius: 8px; padding: 12px; text-align: center;
+  }
+  .achievable-section .achievable-card .value { font-size: 1.2rem; font-weight: 700; color: #ea4335; }
+  .achievable-section .achievable-card .label { font-size: 0.78rem; color: #5f6368; margin-top: 2px; }
+
+  /* Keyword section */
+  .keyword-section { margin-top: 24px; }
+  .keyword-section h3 { font-size: 0.95rem; margin-bottom: 8px; }
+  .keyword-section .hint { font-size: 0.8rem; color: #80868b; margin-bottom: 12px; }
+  .keyword-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .keyword-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border: 1px solid #dadce0; border-radius: 20px;
+    font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+    background: #fff; color: #5f6368;
+  }
+  .keyword-pill.selected { border-color: #1a73e8; background: #e8f0fe; color: #1a73e8; font-weight: 500; }
+  .keyword-pill .kw-cpc { font-size: 0.75rem; color: #80868b; }
+  .keyword-pill.selected .kw-cpc { color: #1a73e8; }
+
+  .custom-kw-row { display: flex; gap: 8px; margin-top: 8px; }
+  .custom-kw-row input { flex: 1; padding: 10px 12px; border: 1px solid #dadce0; border-radius: 8px; font-size: 0.9rem; }
+  .custom-kw-row input:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.15); }
+  .custom-kw-row button { padding: 10px 16px; border: none; border-radius: 8px; background: #1a73e8; color: #fff; cursor: pointer; font-size: 0.85rem; white-space: nowrap; }
+  .custom-kw-row button:hover { background: #1557b0; }
+
+  /* Keyword results in step 3 */
+  .keyword-impact { margin-top: 24px; }
+  .keyword-impact h3 { font-size: 0.95rem; margin-bottom: 12px; }
+  .kw-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .kw-table th { text-align: left; padding: 8px 12px; background: #f8f9fa; border-bottom: 2px solid #dadce0; font-weight: 600; color: #5f6368; }
+  .kw-table td { padding: 8px 12px; border-bottom: 1px solid #f1f3f4; }
+  .kw-table tr:last-child td { border-bottom: none; }
+  .kw-comp { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .kw-comp.high { background: #fce8e6; color: #c5221f; }
+  .kw-comp.medium { background: #fef7e0; color: #e37400; }
+  .kw-comp.low { background: #e6f4ea; color: #137333; }
+
+  .cpc-range-section { margin-top: 24px; padding: 20px; background: #e8f0fe; border-radius: 8px; }
+  .cpc-range-section h3 { font-size: 0.95rem; color: #1a73e8; margin-bottom: 12px; }
+  .cpc-bar-container { margin-bottom: 8px; }
+  .cpc-bar-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: #5f6368; margin-bottom: 4px; }
+  .cpc-bar { height: 8px; background: #dadce0; border-radius: 4px; position: relative; }
+  .cpc-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #34a853, #f9ab00, #ea4335); }
+  .cpc-bar-marker { position: absolute; top: -4px; width: 16px; height: 16px; background: #1a73e8; border: 2px solid #fff; border-radius: 50%; transform: translateX(-50%); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+
   @media (max-width: 600px) {
     .card { padding: 20px; }
     .result-grid { grid-template-columns: 1fr; }
     .tier-tabs { flex-direction: column; }
     h1 { font-size: 1.4rem; }
+    .achievable-section .achievable-grid { grid-template-columns: 1fr; }
+    .kw-table { font-size: 0.78rem; }
+    .kw-table th, .kw-table td { padding: 6px 8px; }
   }
 </style>
 </head>
@@ -340,7 +411,7 @@
       <div class="field">
         <label for="revenue">Monthly Revenue</label>
         <div class="input-prefix">
-          <input type="number" id="revenue" placeholder="e.g. 50000" min="0">
+          <input type="text" id="revenue" placeholder="e.g. 50,000" inputmode="numeric">
         </div>
         <div class="hint">Your average monthly business revenue.</div>
         <div class="error-msg">Please enter a positive number.</div>
@@ -349,7 +420,7 @@
       <div class="field">
         <label for="aov">Average Order Value</label>
         <div class="input-prefix">
-          <input type="number" id="aov" placeholder="e.g. 150" min="0">
+          <input type="text" id="aov" placeholder="e.g. 150" inputmode="numeric">
         </div>
         <div class="hint">Average revenue per customer transaction.</div>
         <div class="error-msg">Please enter a positive number.</div>
@@ -358,7 +429,7 @@
       <div class="field">
         <label for="ltv">Customer Lifetime Value</label>
         <div class="input-prefix">
-          <input type="number" id="ltv" placeholder="e.g. 500" min="0">
+          <input type="text" id="ltv" placeholder="e.g. 500" inputmode="numeric">
         </div>
         <div class="hint">Total expected revenue from one customer over time.</div>
         <div class="error-msg">Please enter a positive number.</div>
@@ -367,7 +438,7 @@
       <div class="field">
         <label for="current-spend">Current Monthly Ad Spend</label>
         <div class="input-prefix">
-          <input type="number" id="current-spend" placeholder="0 if none" min="0" value="0">
+          <input type="text" id="current-spend" placeholder="0 if none" inputmode="numeric" value="0">
         </div>
         <div class="error-msg">Please enter 0 or a positive number.</div>
       </div>
@@ -435,16 +506,40 @@
 
       <div class="field">
         <label for="target-outcome" id="target-label">Target leads per month</label>
-        <input type="number" id="target-outcome" placeholder="e.g. 50" min="1">
+        <input type="text" id="target-outcome" placeholder="e.g. 50" inputmode="numeric">
         <div class="error-msg">Please enter a positive number.</div>
       </div>
 
       <div class="field" id="cpa-field">
         <label for="target-cpa">Target Cost Per Acquisition (optional)</label>
         <div class="input-prefix">
-          <input type="number" id="target-cpa" placeholder="Leave blank for estimate" min="0">
+          <input type="text" id="target-cpa" placeholder="Leave blank for estimate" inputmode="numeric">
         </div>
         <div class="hint">Max you'd pay per lead/sale. We'll estimate if left blank.</div>
+      </div>
+
+      <div class="budget-toggle">
+        <input type="checkbox" id="has-max-budget">
+        <label for="has-max-budget">I have a maximum budget I can't exceed</label>
+      </div>
+      <div class="budget-max-field" id="max-budget-field">
+        <div class="field">
+          <label for="max-budget">Maximum Monthly Budget</label>
+          <div class="input-prefix">
+            <input type="text" id="max-budget" placeholder="e.g. 2,000" inputmode="numeric">
+          </div>
+          <div class="hint">We'll show what's achievable within this budget.</div>
+        </div>
+      </div>
+
+      <div class="keyword-section" id="keyword-section" style="display:none">
+        <h3>Keyword Targeting</h3>
+        <p class="hint">Select keywords relevant to your business. This helps us estimate more accurate CPCs and competition levels.</p>
+        <div class="keyword-pills" id="keyword-pills"></div>
+        <div class="custom-kw-row">
+          <input type="text" id="custom-keyword" placeholder="Add your own keyword...">
+          <button onclick="addCustomKeyword()">Add</button>
+        </div>
       </div>
 
       <div class="btn-row">
