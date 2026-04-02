@@ -576,8 +576,184 @@ const INDUSTRY_DATA = {
   arts:             { label:"Arts & Entertainment",        avgCPC:1.60, avgCTR:10.00,avgCVR:6.30, avgCPL:25.40,  avgROAS:5.0, adSpendPct:0.06 }
 };
 
+// Keyword data per industry: name, cpc range [low, high], competition level
+const KEYWORD_DATA = {
+  legal: [
+    {kw:"personal injury lawyer",cpc:[45,120],comp:"high"},{kw:"divorce attorney",cpc:[15,55],comp:"high"},
+    {kw:"criminal defense lawyer",cpc:[12,65],comp:"high"},{kw:"estate planning attorney",cpc:[8,30],comp:"medium"},
+    {kw:"legal consultation",cpc:[5,20],comp:"medium"},{kw:"immigration lawyer",cpc:[8,35],comp:"high"},
+    {kw:"business attorney",cpc:[6,25],comp:"medium"},{kw:"free legal advice",cpc:[2,10],comp:"low"}
+  ],
+  dental: [
+    {kw:"dentist near me",cpc:[5,18],comp:"high"},{kw:"dental implants",cpc:[8,30],comp:"high"},
+    {kw:"teeth whitening",cpc:[3,12],comp:"medium"},{kw:"emergency dentist",cpc:[6,22],comp:"high"},
+    {kw:"dental insurance",cpc:[4,15],comp:"medium"},{kw:"orthodontist",cpc:[3,14],comp:"medium"},
+    {kw:"cosmetic dentistry",cpc:[5,20],comp:"high"},{kw:"pediatric dentist",cpc:[3,12],comp:"medium"}
+  ],
+  home_improvement: [
+    {kw:"kitchen remodel",cpc:[6,25],comp:"high"},{kw:"bathroom renovation",cpc:[5,20],comp:"high"},
+    {kw:"roofing contractor",cpc:[8,35],comp:"high"},{kw:"house painter",cpc:[4,15],comp:"medium"},
+    {kw:"plumber near me",cpc:[6,22],comp:"high"},{kw:"home renovation",cpc:[4,18],comp:"medium"},
+    {kw:"flooring installation",cpc:[3,14],comp:"medium"},{kw:"window replacement",cpc:[8,30],comp:"high"}
+  ],
+  education: [
+    {kw:"online courses",cpc:[4,18],comp:"high"},{kw:"tutoring services",cpc:[3,12],comp:"medium"},
+    {kw:"coding bootcamp",cpc:[8,30],comp:"high"},{kw:"test prep",cpc:[5,20],comp:"medium"},
+    {kw:"online degree",cpc:[10,40],comp:"high"},{kw:"language classes",cpc:[2,10],comp:"low"},
+    {kw:"math tutor",cpc:[3,12],comp:"medium"},{kw:"SAT prep",cpc:[5,18],comp:"medium"}
+  ],
+  finance: [
+    {kw:"life insurance quotes",cpc:[15,55],comp:"high"},{kw:"financial advisor",cpc:[10,40],comp:"high"},
+    {kw:"tax preparation",cpc:[5,20],comp:"medium"},{kw:"mortgage rates",cpc:[12,45],comp:"high"},
+    {kw:"business loans",cpc:[10,40],comp:"high"},{kw:"accounting services",cpc:[5,18],comp:"medium"},
+    {kw:"retirement planning",cpc:[6,22],comp:"medium"},{kw:"bookkeeper",cpc:[4,15],comp:"medium"}
+  ],
+  healthcare: [
+    {kw:"doctor near me",cpc:[3,14],comp:"high"},{kw:"urgent care",cpc:[4,18],comp:"high"},
+    {kw:"physical therapy",cpc:[4,16],comp:"medium"},{kw:"dermatologist",cpc:[3,12],comp:"medium"},
+    {kw:"mental health therapist",cpc:[4,15],comp:"medium"},{kw:"telehealth",cpc:[3,12],comp:"medium"},
+    {kw:"pediatrician near me",cpc:[2,10],comp:"medium"},{kw:"health clinic",cpc:[2,8],comp:"low"}
+  ],
+  automotive: [
+    {kw:"auto repair near me",cpc:[3,10],comp:"high"},{kw:"oil change",cpc:[1,5],comp:"medium"},
+    {kw:"tire shop",cpc:[2,8],comp:"medium"},{kw:"car battery replacement",cpc:[2,7],comp:"medium"},
+    {kw:"brake repair",cpc:[3,10],comp:"high"},{kw:"transmission repair",cpc:[4,14],comp:"high"},
+    {kw:"auto body shop",cpc:[2,9],comp:"medium"},{kw:"car detailing",cpc:[1,6],comp:"low"}
+  ],
+  real_estate: [
+    {kw:"homes for sale",cpc:[1,6],comp:"high"},{kw:"real estate agent",cpc:[3,12],comp:"high"},
+    {kw:"houses for rent",cpc:[1,5],comp:"medium"},{kw:"commercial real estate",cpc:[4,15],comp:"high"},
+    {kw:"property management",cpc:[3,12],comp:"medium"},{kw:"sell my house",cpc:[5,18],comp:"high"},
+    {kw:"real estate listings",cpc:[1,5],comp:"medium"},{kw:"home appraisal",cpc:[2,8],comp:"medium"}
+  ],
+  ecommerce: [
+    {kw:"buy online",cpc:[1,4],comp:"high"},{kw:"free shipping",cpc:[0.5,3],comp:"medium"},
+    {kw:"best deals",cpc:[1,4],comp:"medium"},{kw:"discount code",cpc:[0.5,3],comp:"low"},
+    {kw:"shop [product]",cpc:[1,5],comp:"high"},{kw:"[product] reviews",cpc:[0.5,3],comp:"medium"},
+    {kw:"compare prices",cpc:[1,4],comp:"medium"},{kw:"next day delivery",cpc:[0.5,3],comp:"low"}
+  ],
+  saas: [
+    {kw:"project management software",cpc:[8,30],comp:"high"},{kw:"CRM software",cpc:[10,40],comp:"high"},
+    {kw:"accounting software",cpc:[6,25],comp:"high"},{kw:"email marketing tool",cpc:[5,20],comp:"medium"},
+    {kw:"HR software",cpc:[8,30],comp:"high"},{kw:"helpdesk software",cpc:[5,18],comp:"medium"},
+    {kw:"inventory management",cpc:[4,16],comp:"medium"},{kw:"free trial [product]",cpc:[3,12],comp:"low"}
+  ],
+  travel: [
+    {kw:"cheap flights",cpc:[1,5],comp:"high"},{kw:"hotel deals",cpc:[1,6],comp:"high"},
+    {kw:"vacation packages",cpc:[2,8],comp:"medium"},{kw:"car rental",cpc:[1,5],comp:"high"},
+    {kw:"all inclusive resorts",cpc:[2,8],comp:"medium"},{kw:"cruise deals",cpc:[1,6],comp:"medium"},
+    {kw:"travel insurance",cpc:[3,12],comp:"medium"},{kw:"last minute deals",cpc:[1,5],comp:"low"}
+  ],
+  restaurants: [
+    {kw:"restaurants near me",cpc:[1,4],comp:"high"},{kw:"food delivery",cpc:[1,5],comp:"high"},
+    {kw:"catering services",cpc:[2,8],comp:"medium"},{kw:"best pizza",cpc:[1,4],comp:"medium"},
+    {kw:"brunch near me",cpc:[1,3],comp:"low"},{kw:"takeout food",cpc:[1,4],comp:"medium"},
+    {kw:"private dining",cpc:[2,7],comp:"low"},{kw:"party catering",cpc:[2,8],comp:"medium"}
+  ],
+  beauty: [
+    {kw:"hair salon near me",cpc:[2,8],comp:"high"},{kw:"facial treatment",cpc:[2,10],comp:"medium"},
+    {kw:"nail salon",cpc:[1,5],comp:"medium"},{kw:"spa near me",cpc:[2,8],comp:"medium"},
+    {kw:"skincare products",cpc:[1,6],comp:"high"},{kw:"eyelash extensions",cpc:[2,8],comp:"medium"},
+    {kw:"hair coloring",cpc:[1,5],comp:"medium"},{kw:"beauty products online",cpc:[1,5],comp:"medium"}
+  ],
+  fitness: [
+    {kw:"gym near me",cpc:[2,7],comp:"high"},{kw:"personal trainer",cpc:[2,8],comp:"medium"},
+    {kw:"yoga classes",cpc:[1,5],comp:"medium"},{kw:"crossfit gym",cpc:[2,6],comp:"medium"},
+    {kw:"weight loss program",cpc:[3,12],comp:"high"},{kw:"fitness classes",cpc:[1,5],comp:"medium"},
+    {kw:"martial arts classes",cpc:[2,6],comp:"medium"},{kw:"swimming lessons",cpc:[1,5],comp:"low"}
+  ],
+  arts: [
+    {kw:"art classes",cpc:[1,4],comp:"medium"},{kw:"live music",cpc:[0.5,3],comp:"low"},
+    {kw:"theater tickets",cpc:[1,4],comp:"medium"},{kw:"photography classes",cpc:[1,5],comp:"medium"},
+    {kw:"art gallery",cpc:[0.5,3],comp:"low"},{kw:"music lessons",cpc:[1,5],comp:"medium"},
+    {kw:"painting classes",cpc:[1,4],comp:"low"},{kw:"event tickets",cpc:[1,4],comp:"medium"}
+  ]
+};
+
+let selectedKeywords = [];
+
 // State
 let currentStep = 1;
+
+// --- Comma formatting for number inputs ---
+function parseNum(str) {
+  return Number(String(str).replace(/[^0-9.]/g, '')) || 0;
+}
+function formatWithCommas(val) {
+  const num = String(val).replace(/[^0-9.]/g, '');
+  if (!num) return '';
+  const parts = num.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return parts.join('.');
+}
+document.querySelectorAll('input[inputmode="numeric"]').forEach(input => {
+  input.addEventListener('input', function() {
+    const pos = this.selectionStart;
+    const oldLen = this.value.length;
+    this.value = formatWithCommas(this.value);
+    const newLen = this.value.length;
+    this.setSelectionRange(pos + (newLen - oldLen), pos + (newLen - oldLen));
+  });
+});
+
+// --- Budget constraint toggle ---
+document.getElementById('has-max-budget').addEventListener('change', function() {
+  document.getElementById('max-budget-field').classList.toggle('visible', this.checked);
+});
+
+// --- Keyword section: show when industry selected, populate pills ---
+document.getElementById('industry').addEventListener('change', function() {
+  const sec = document.getElementById('keyword-section');
+  if (this.value && KEYWORD_DATA[this.value]) {
+    sec.style.display = '';
+    populateKeywords(this.value);
+  } else {
+    sec.style.display = 'none';
+  }
+});
+function populateKeywords(industry) {
+  const container = document.getElementById('keyword-pills');
+  const kws = KEYWORD_DATA[industry] || [];
+  selectedKeywords = [];
+  container.innerHTML = kws.map((k, i) =>
+    `<div class="keyword-pill" data-idx="${i}" onclick="toggleKeyword(this, ${i})">
+      ${k.kw} <span class="kw-cpc">$${k.cpc[0]}-$${k.cpc[1]}</span>
+    </div>`
+  ).join('');
+}
+function toggleKeyword(el, idx) {
+  el.classList.toggle('selected');
+  const industry = document.getElementById('industry').value;
+  const kw = KEYWORD_DATA[industry][idx];
+  if (el.classList.contains('selected')) {
+    selectedKeywords.push(kw);
+  } else {
+    selectedKeywords = selectedKeywords.filter(k => k.kw !== kw.kw);
+  }
+}
+function addCustomKeyword() {
+  const input = document.getElementById('custom-keyword');
+  const val = input.value.trim();
+  if (!val) return;
+  const industry = document.getElementById('industry').value;
+  const ind = INDUSTRY_DATA[industry];
+  const customKw = { kw: val, cpc: [Math.round(ind.avgCPC * 0.6 * 100) / 100, Math.round(ind.avgCPC * 1.4 * 100) / 100], comp: 'medium', custom: true };
+  selectedKeywords.push(customKw);
+  const container = document.getElementById('keyword-pills');
+  const pill = document.createElement('div');
+  pill.className = 'keyword-pill selected';
+  pill.innerHTML = `${val} <span class="kw-cpc">$${customKw.cpc[0]}-$${customKw.cpc[1]}</span>`;
+  pill.onclick = function() {
+    this.classList.toggle('selected');
+    if (this.classList.contains('selected')) { selectedKeywords.push(customKw); }
+    else { selectedKeywords = selectedKeywords.filter(k => k.kw !== customKw.kw); }
+  };
+  container.appendChild(pill);
+  input.value = '';
+}
+document.getElementById('custom-keyword').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); addCustomKeyword(); }
+});
 
 // Goal label updater
 document.querySelectorAll('input[name="goal"]').forEach(r => {
@@ -590,6 +766,13 @@ document.querySelectorAll('input[name="goal"]').forEach(r => {
 
 function goToStep(step) {
   if (step === 2 && !validateStep1()) return;
+  if (step === 2) {
+    const industry = document.getElementById('industry').value;
+    if (industry && KEYWORD_DATA[industry]) {
+      document.getElementById('keyword-section').style.display = '';
+      if (document.getElementById('keyword-pills').children.length === 0) populateKeywords(industry);
+    }
+  }
   if (step === 3 && !validateStep2()) return;
   if (step === 3) renderResults();
 
@@ -599,7 +782,7 @@ function goToStep(step) {
   for (let i = 1; i <= 3; i++) {
     const dot = document.getElementById('dot-' + i);
     dot.className = 'progress-dot' + (i === step ? ' active' : (i < step ? ' completed' : ''));
-    dot.textContent = i < step ? '✓' : i;
+    dot.textContent = i < step ? '\u2713' : i;
   }
   document.getElementById('line-1').className = 'progress-line' + (step > 1 ? ' filled' : '');
   document.getElementById('line-2').className = 'progress-line' + (step > 2 ? ' filled' : '');
@@ -615,81 +798,83 @@ function setInvalid(id, invalid) {
 function validateStep1() {
   let ok = true;
   if (!document.getElementById('industry').value) { setInvalid('industry', true); ok = false; } else setInvalid('industry', false);
-  const rev = Number(document.getElementById('revenue').value);
-  if (!rev || rev <= 0) { setInvalid('revenue', true); ok = false; } else setInvalid('revenue', false);
-  const aov = Number(document.getElementById('aov').value);
-  if (!aov || aov <= 0) { setInvalid('aov', true); ok = false; } else setInvalid('aov', false);
-  const ltv = Number(document.getElementById('ltv').value);
-  if (!ltv || ltv <= 0) { setInvalid('ltv', true); ok = false; } else setInvalid('ltv', false);
+  if (parseNum(document.getElementById('revenue').value) <= 0) { setInvalid('revenue', true); ok = false; } else setInvalid('revenue', false);
+  if (parseNum(document.getElementById('aov').value) <= 0) { setInvalid('aov', true); ok = false; } else setInvalid('aov', false);
+  if (parseNum(document.getElementById('ltv').value) <= 0) { setInvalid('ltv', true); ok = false; } else setInvalid('ltv', false);
   return ok;
 }
 
 function validateStep2() {
-  const target = Number(document.getElementById('target-outcome').value);
+  const target = parseNum(document.getElementById('target-outcome').value);
   if (!target || target <= 0) { setInvalid('target-outcome', true); return false; }
   setInvalid('target-outcome', false);
   return true;
 }
 
 function getState() {
+  const hasMax = document.getElementById('has-max-budget').checked;
   return {
     industry: document.getElementById('industry').value,
-    revenue: Number(document.getElementById('revenue').value),
-    aov: Number(document.getElementById('aov').value),
-    ltv: Number(document.getElementById('ltv').value),
-    currentSpend: Number(document.getElementById('current-spend').value) || 0,
+    revenue: parseNum(document.getElementById('revenue').value),
+    aov: parseNum(document.getElementById('aov').value),
+    ltv: parseNum(document.getElementById('ltv').value),
+    currentSpend: parseNum(document.getElementById('current-spend').value),
     cvr: Number(document.getElementById('cvr').value) || 0,
     salesCycle: document.getElementById('sales-cycle').value,
     goal: document.querySelector('input[name="goal"]:checked').value,
-    targetOutcome: Number(document.getElementById('target-outcome').value),
-    targetCPA: Number(document.getElementById('target-cpa').value) || 0
+    targetOutcome: parseNum(document.getElementById('target-outcome').value),
+    targetCPA: parseNum(document.getElementById('target-cpa').value),
+    hasMaxBudget: hasMax,
+    maxBudget: hasMax ? parseNum(document.getElementById('max-budget').value) : 0,
+    selectedKeywords: selectedKeywords.slice()
   };
+}
+
+function getEffectiveCPC(state) {
+  const ind = INDUSTRY_DATA[state.industry];
+  if (state.selectedKeywords.length === 0) return ind.avgCPC;
+  const avg = state.selectedKeywords.reduce((s, k) => s + (k.cpc[0] + k.cpc[1]) / 2, 0) / state.selectedKeywords.length;
+  return avg * 0.7 + ind.avgCPC * 0.3;
 }
 
 function calculateBudget(state) {
   const ind = INDUSTRY_DATA[state.industry];
   const cvr = state.cvr > 0 ? state.cvr : ind.avgCVR;
+  const cpc = getEffectiveCPC(state);
 
-  // Method 1: Goal-backward
   let goalBudget;
   if (state.goal === 'awareness') {
-    const cpm = ind.avgCPC * (ind.avgCTR / 100) * 1000;
+    const cpm = cpc * (ind.avgCTR / 100) * 1000;
     goalBudget = (state.targetOutcome / 1000) * cpm;
   } else if (state.goal === 'traffic') {
-    goalBudget = state.targetOutcome * ind.avgCPC;
+    goalBudget = state.targetOutcome * cpc;
   } else {
     const neededClicks = state.targetOutcome / (cvr / 100);
-    goalBudget = neededClicks * ind.avgCPC;
+    goalBudget = neededClicks * cpc;
   }
 
-  // Method 2: Revenue percentage
   const revBudget = state.revenue * ind.adSpendPct;
-
-  // Method 3: Competitive (CPL-based)
   const compBudget = state.targetOutcome * ind.avgCPL;
 
-  // Blend
   let recommended = goalBudget * 0.6 + revBudget * 0.25 + compBudget * 0.15;
-
-  // Floor: 10 clicks/day minimum
-  const floor = ind.avgCPC * 10 * 30;
+  const floor = cpc * 10 * 30;
   recommended = Math.max(recommended, floor);
-
-  // Ceiling: 30% of revenue for safety
   const ceiling = state.revenue * 0.30;
   if (recommended > ceiling) recommended = ceiling;
 
   return {
     recommended: Math.round(recommended),
     conservative: Math.round(recommended * 0.6),
-    aggressive: Math.round(recommended * 1.5)
+    aggressive: Math.round(recommended * 1.5),
+    goalBudget: Math.round(goalBudget)
   };
 }
 
 function projectMetrics(budget, state) {
   const ind = INDUSTRY_DATA[state.industry];
   const cvr = state.cvr > 0 ? state.cvr : ind.avgCVR;
-  const clicks = budget / ind.avgCPC;
+  const cpc = getEffectiveCPC(state);
+  const clicks = budget / cpc;
   const impressions = clicks / (ind.avgCTR / 100);
   const conversions = clicks * (cvr / 100);
   const cpa = conversions > 0 ? budget / conversions : 0;
@@ -697,68 +882,147 @@ function projectMetrics(budget, state) {
   const roas = budget > 0 ? revenue / budget : 0;
   const ltvRevenue = conversions * state.ltv;
   const ltvRoas = budget > 0 ? ltvRevenue / budget : 0;
-  return { clicks: Math.round(clicks), impressions: Math.round(impressions), conversions: Math.round(conversions), cpa: Math.round(cpa), revenue: Math.round(revenue), roas: roas.toFixed(1), ltvRevenue: Math.round(ltvRevenue), ltvRoas: ltvRoas.toFixed(1) };
+  return { clicks: Math.round(clicks), impressions: Math.round(impressions), conversions: Math.round(conversions), cpa: Math.round(cpa), revenue: Math.round(revenue), roas: roas.toFixed(1), ltvRevenue: Math.round(ltvRevenue), ltvRoas: ltvRoas.toFixed(1), cpc: cpc.toFixed(2) };
 }
 
-function realityCheck(state, proj) {
+function realityCheck(state, proj, budgets) {
   const ind = INDUSTRY_DATA[state.industry];
   const checks = [];
   if (state.targetCPA > 0 && state.targetCPA < ind.avgCPL * 0.5)
-    checks.push({ type:'warning', msg:'Your target CPA ($'+state.targetCPA+') is well below the industry average ($'+ind.avgCPL.toFixed(0)+'). This may be hard to achieve without strong conversion optimization.' });
-  if (proj.conversions < 50)
-    checks.push({ type:'info', msg:'At this budget, expect ~'+proj.conversions+' conversions/month. Google typically needs 30–50+ conversions to optimize automated bidding effectively.' });
+    checks.push({ type:'warning', msg:'Your target CPA ($'+fmt(state.targetCPA)+') is well below the industry average ($'+fmt(Math.round(ind.avgCPL))+'). This may require exceptional landing page optimization or niche keyword targeting to achieve.' });
+  if (proj.conversions < 15)
+    checks.push({ type:'warning', msg:'At this budget you\'d expect only ~'+proj.conversions+' conversions/month. Google\'s Smart Bidding needs 30-50+ conversions to optimize effectively. Consider starting with manual CPC bidding.' });
+  else if (proj.conversions < 50)
+    checks.push({ type:'info', msg:'At ~'+proj.conversions+' conversions/month, you\'re near the threshold for Smart Bidding optimization. Performance should improve as data accumulates over 2-3 months.' });
   if (state.cvr > 0 && state.cvr > ind.avgCVR * 2)
-    checks.push({ type:'info', msg:'Your conversion rate ('+state.cvr+'%) is well above the industry average ('+ind.avgCVR+'%). Projections assume this holds for paid traffic.' });
+    checks.push({ type:'info', msg:'Your conversion rate ('+state.cvr+'%) is well above the '+ind.label+' average ('+ind.avgCVR+'%). These projections assume your rate holds for paid traffic, which often converts differently than organic.' });
   if (state.salesCycle === '1-3months' || state.salesCycle === '3+months')
-    checks.push({ type:'info', msg:'With a longer sales cycle, expect ROI to take 2–4 months to materialize. Budget for at least 3 months before evaluating.' });
+    checks.push({ type:'info', msg:'With a longer sales cycle, don\'t judge ROI in the first month. Budget for at least 3 months of consistent spend before evaluating. Use remarketing to stay visible during the decision process.' });
+  if (Number(proj.roas) < 1 && Number(proj.ltvRoas) >= 1)
+    checks.push({ type:'info', msg:'First-purchase ROAS is below 1x, but your customer lifetime value brings it to '+proj.ltvRoas+'x. This is a viable strategy if you can sustain the initial cash flow gap.' });
+  if (state.hasMaxBudget && state.maxBudget > 0 && state.maxBudget < budgets.recommended)
+    checks.push({ type:'warning', msg:'Your maximum budget ($'+fmt(state.maxBudget)+') is below our recommended spend ($'+fmt(budgets.recommended)+'). See below for what\'s realistically achievable at your budget.' });
   return checks;
 }
 
-function fmt(n) {
-  return n.toLocaleString('en-US');
+function fmt(n) { return Number(n).toLocaleString('en-US'); }
+
+function getGoalLabel(goal) {
+  return { leads:'leads', transactions:'sales', traffic:'visitors', awareness:'impressions' }[goal] || 'conversions';
 }
 
 function renderResults() {
   const state = getState();
   const budgets = calculateBudget(state);
   const ind = INDUSTRY_DATA[state.industry];
-  const tiers = { conservative: budgets.conservative, recommended: budgets.recommended, aggressive: budgets.aggressive };
+  const cpc = getEffectiveCPC(state);
+  const isOverBudget = state.hasMaxBudget && state.maxBudget > 0 && state.maxBudget < budgets.conservative;
+  const isCapped = state.hasMaxBudget && state.maxBudget > 0 && state.maxBudget < budgets.recommended;
 
-  let proj = projectMetrics(budgets.recommended, state);
-  const checks = realityCheck(state, proj);
-  const recs = getRecommendations(state, proj, ind);
+  const activeBudget = isCapped ? state.maxBudget : budgets.recommended;
+  let proj = projectMetrics(activeBudget, state);
+  const checks = realityCheck(state, proj, budgets);
+  const recs = getRecommendations(state, proj, ind, budgets, isCapped);
 
-  const container = document.getElementById('results-card');
-  container.innerHTML = `
-    <div class="step-title">Your Budget Recommendation</div>
-    <div class="tier-tabs">
-      <div class="tier-tab" data-tier="conservative" onclick="selectTier(this)">Conservative<span class="tier-amount">$${fmt(tiers.conservative)}/mo</span></div>
-      <div class="tier-tab active" data-tier="recommended" onclick="selectTier(this)">Recommended<span class="tier-amount">$${fmt(tiers.recommended)}/mo</span></div>
-      <div class="tier-tab" data-tier="aggressive" onclick="selectTier(this)">Aggressive<span class="tier-amount">$${fmt(tiers.aggressive)}/mo</span></div>
+  // Build consultation narrative
+  const goalLabel = getGoalLabel(state.goal);
+  let narrative = '';
+  if (isOverBudget) {
+    narrative = `<div style="background:#fce8e6;padding:16px;border-radius:8px;border-left:4px solid #ea4335;margin-bottom:20px;font-size:0.9rem;color:#202124;">
+      <strong style="color:#c5221f;">Honest assessment:</strong> Your goal of ${fmt(state.targetOutcome)} ${goalLabel}/month would typically require around <strong>$${fmt(budgets.recommended)}/month</strong> in ${ind.label}. At your $${fmt(state.maxBudget)} budget, here's what you can realistically expect instead.</div>`;
+  } else if (isCapped) {
+    narrative = `<div style="background:#fef7e0;padding:16px;border-radius:8px;border-left:4px solid #f9ab00;margin-bottom:20px;font-size:0.9rem;color:#202124;">
+      <strong style="color:#e37400;">Budget-adjusted plan:</strong> To fully hit ${fmt(state.targetOutcome)} ${goalLabel}/month, we'd recommend $${fmt(budgets.recommended)}/month. Working within your $${fmt(state.maxBudget)} budget, here's a realistic plan to maximize every dollar.</div>`;
+  } else {
+    narrative = `<div style="background:#e6f4ea;padding:16px;border-radius:8px;border-left:4px solid #34a853;margin-bottom:20px;font-size:0.9rem;color:#202124;">
+      <strong style="color:#137333;">Good news:</strong> Based on ${ind.label} benchmarks and your business profile, your goal of ${fmt(state.targetOutcome)} ${goalLabel}/month looks achievable. Here's our recommended investment plan.</div>`;
+  }
+
+  // CPC range section
+  const cpcLow = (cpc * 0.7).toFixed(2);
+  const cpcHigh = (cpc * 1.5).toFixed(2);
+  const cpcPct = Math.min(((cpc - cpc*0.5) / (cpc*1.8 - cpc*0.5)) * 100, 100);
+  const cpcRangeHTML = `<div class="cpc-range-section">
+    <h3>Expected Cost-Per-Click Range</h3>
+    <div class="cpc-bar-label"><span>$${cpcLow}</span><span>Your est. CPC: $${cpc.toFixed(2)}</span><span>$${cpcHigh}</span></div>
+    <div class="cpc-bar"><div class="cpc-bar-fill" style="width:100%"></div><div class="cpc-bar-marker" style="left:${cpcPct}%"></div></div>
+    <p style="font-size:0.78rem;color:#5f6368;margin-top:8px;">Industry avg for ${ind.label}: $${ind.avgCPC.toFixed(2)}/click${state.selectedKeywords.length ? ' | Adjusted for your selected keywords' : ''}</p>
+  </div>`;
+
+  // Keyword impact table
+  let kwHTML = '';
+  if (state.selectedKeywords.length > 0) {
+    kwHTML = `<div class="keyword-impact"><h3>Keyword Analysis</h3><table class="kw-table"><thead><tr><th>Keyword</th><th>Est. CPC</th><th>Competition</th></tr></thead><tbody>`;
+    state.selectedKeywords.forEach(k => {
+      const avg = ((k.cpc[0]+k.cpc[1])/2).toFixed(2);
+      kwHTML += `<tr><td>${k.kw}</td><td>$${k.cpc[0].toFixed(2)} - $${k.cpc[1].toFixed(2)}</td><td><span class="kw-comp ${k.comp}">${k.comp}</span></td></tr>`;
+    });
+    kwHTML += '</tbody></table></div>';
+  }
+
+  // Achievable section when over budget
+  let achievableHTML = '';
+  if (isCapped) {
+    const cappedProj = projectMetrics(state.maxBudget, state);
+    const pctOfGoal = Math.round((cappedProj.conversions / state.targetOutcome) * 100);
+    achievableHTML = `<div class="achievable-section">
+      <h3>What's Achievable at $${fmt(state.maxBudget)}/month</h3>
+      <p style="font-size:0.85rem;margin-bottom:12px;color:#5f6368;">At your budget, you can expect approximately <strong>${pctOfGoal}%</strong> of your target goal:</p>
+      <div class="achievable-grid">
+        <div class="achievable-card"><div class="value">${fmt(cappedProj.conversions)}</div><div class="label">Est. ${goalLabel}/month (vs. ${fmt(state.targetOutcome)} target)</div></div>
+        <div class="achievable-card"><div class="value">$${fmt(cappedProj.cpa)}</div><div class="label">Est. cost per ${goalLabel === 'leads' ? 'lead' : goalLabel === 'sales' ? 'sale' : goalLabel.slice(0,-1)}</div></div>
+        <div class="achievable-card"><div class="value">${fmt(cappedProj.clicks)}</div><div class="label">Est. monthly clicks</div></div>
+        <div class="achievable-card"><div class="value">${cappedProj.roas}x</div><div class="label">Est. ROAS</div></div>
+      </div>
+      <p style="font-size:0.8rem;color:#5f6368;margin-top:12px;">To reach your full goal of ${fmt(state.targetOutcome)} ${goalLabel}, you'd need to increase your budget to approximately <strong>$${fmt(budgets.recommended)}/month</strong>.</p>
+    </div>`;
+  }
+
+  // Tier display - adjust if capped
+  let tierHTML;
+  if (isCapped) {
+    tierHTML = `<div class="result-card highlight">
+      <div class="value" id="res-budget">$${fmt(state.maxBudget)}<span style="font-size:0.9rem;font-weight:400">/month (your max)</span></div>
+      <div class="label">Working within your budget &middot; $${fmt(Math.round(state.maxBudget/30))}/day</div>
+    </div>`;
+  } else {
+    tierHTML = `<div class="tier-tabs">
+      <div class="tier-tab" data-tier="conservative" onclick="selectTier(this)">Conservative<span class="tier-amount">$${fmt(budgets.conservative)}/mo</span></div>
+      <div class="tier-tab active" data-tier="recommended" onclick="selectTier(this)">Recommended<span class="tier-amount">$${fmt(budgets.recommended)}/mo</span></div>
+      <div class="tier-tab" data-tier="aggressive" onclick="selectTier(this)">Aggressive<span class="tier-amount">$${fmt(budgets.aggressive)}/mo</span></div>
     </div>
     <div class="result-card highlight">
       <div class="value" id="res-budget">$${fmt(budgets.recommended)}<span style="font-size:0.9rem;font-weight:400">/month</span></div>
       <div class="label">Recommended Monthly Budget &middot; $${fmt(Math.round(budgets.recommended/30))}/day</div>
-    </div>
+    </div>`;
+  }
+
+  const container = document.getElementById('results-card');
+  container.innerHTML = `
+    <div class="step-title">Your Google Ads Consultation</div>
+    ${narrative}
+    ${tierHTML}
     <div class="result-grid" id="metrics-grid">
       <div class="result-card"><div class="value" id="res-clicks">${fmt(proj.clicks)}</div><div class="label">Est. Monthly Clicks</div></div>
-      <div class="result-card"><div class="value" id="res-conversions">${fmt(proj.conversions)}</div><div class="label">Est. Conversions</div></div>
-      <div class="result-card"><div class="value" id="res-cpa">$${fmt(proj.cpa)}</div><div class="label">Est. Cost Per Acquisition</div></div>
+      <div class="result-card"><div class="value" id="res-conversions">${fmt(proj.conversions)}</div><div class="label">Est. ${goalLabel.charAt(0).toUpperCase()+goalLabel.slice(1)}</div></div>
+      <div class="result-card"><div class="value" id="res-cpa">$${fmt(proj.cpa)}</div><div class="label">Est. Cost Per ${goalLabel === 'leads' ? 'Lead' : goalLabel === 'sales' ? 'Sale' : 'Acquisition'}</div></div>
       <div class="result-card"><div class="value" id="res-roas">${proj.roas}x</div><div class="label">Est. ROAS</div></div>
-      <div class="result-card"><div class="value" id="res-revenue">$${fmt(proj.revenue)}</div><div class="label">Est. Monthly Revenue</div></div>
+      <div class="result-card"><div class="value" id="res-revenue">$${fmt(proj.revenue)}</div><div class="label">Est. Monthly Revenue from Ads</div></div>
       <div class="result-card"><div class="value" id="res-ltv-roas">${proj.ltvRoas}x</div><div class="label">LTV-Adjusted ROAS</div></div>
     </div>
+    ${cpcRangeHTML}
+    ${kwHTML}
+    ${achievableHTML}
     ${checks.length ? `<div class="reality-checks"><h3>Reality Check</h3>${checks.map(c=>'<div class="reality-check-item '+c.type+'">'+c.msg+'</div>').join('')}</div>` : ''}
-    ${recs.length ? `<div class="recommendations"><h3>Recommendations</h3><ul>${recs.map(r=>'<li>'+r+'</li>').join('')}</ul></div>` : ''}
-    <p class="disclaimer">Estimates based on 2025 industry benchmarks. Actual results vary based on ad quality, landing pages, competition, and seasonality.</p>
+    ${recs.length ? `<div class="recommendations"><h3>Our Recommendations</h3><ul>${recs.map(r=>'<li>'+r+'</li>').join('')}</ul></div>` : ''}
+    <p class="disclaimer">Estimates based on 2025 industry benchmarks. Actual results vary based on ad quality, landing pages, competition, and seasonality. This tool provides directional guidance, not a guarantee of results.</p>
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="goToStep(1)">Start Over</button>
       <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
     </div>
   `;
 
-  // Store tiers for switching
-  window._tiers = tiers;
+  window._tiers = { conservative: budgets.conservative, recommended: budgets.recommended, aggressive: budgets.aggressive };
   window._state = state;
 }
 
@@ -776,16 +1040,24 @@ function selectTier(el) {
   document.getElementById('res-ltv-roas').textContent = proj.ltvRoas+'x';
 }
 
-function getRecommendations(state, proj, ind) {
+function getRecommendations(state, proj, ind, budgets, isCapped) {
   const recs = [];
   const cvr = state.cvr > 0 ? state.cvr : ind.avgCVR;
-  if (cvr < ind.avgCVR) recs.push('Your conversion rate is below average. Improve landing pages before scaling spend.');
-  if (state.goal === 'awareness') recs.push('Consider Display + YouTube campaigns alongside Search for maximum reach.');
-  if (proj.conversions < 30) recs.push('Start with exact-match keywords to maximize relevance per dollar at this budget level.');
-  if (state.salesCycle === '1-3months' || state.salesCycle === '3+months') recs.push('Use remarketing lists to stay in front of prospects during your longer sales cycle.');
-  if (state.currentSpend === 0) recs.push('As a new advertiser, start with the conservative budget for 2–4 weeks, then scale up based on results.');
-  if (proj.roas < 1) recs.push('Projected first-purchase ROAS is below 1x. Focus on LTV — ensure repeat purchases justify the acquisition cost.');
-  if (recs.length === 0) recs.push('Your profile looks solid. Start with the recommended budget and review performance after 30 days.');
+  if (isCapped) {
+    recs.push('Focus your limited budget on your highest-converting keywords. Use exact match and phrase match to avoid wasting spend on broad queries.');
+    recs.push('Set up conversion tracking immediately so Google can learn which clicks are most valuable for your business.');
+  }
+  if (cvr < ind.avgCVR) recs.push('Your conversion rate is below the '+ind.label+' average ('+ind.avgCVR+'%). Improving your landing page could be more impactful than increasing ad spend.');
+  if (state.goal === 'awareness') recs.push('For brand awareness, combine Search with Display and YouTube campaigns. Consider allocating 60% to Search and 40% to Display/Video.');
+  if (proj.conversions < 30 && !isCapped) recs.push('At this budget level, start with exact-match keywords to maximize relevance per dollar. Expand to phrase match once you identify winners.');
+  if (state.salesCycle === '1-3months' || state.salesCycle === '3+months') recs.push('Set up remarketing lists (RLSA) to stay in front of prospects during your '+state.salesCycle.replace('-',' to ').replace('+', '+')+' sales cycle.');
+  if (state.currentSpend === 0) recs.push('As a new advertiser, start with the conservative budget for 2-4 weeks. Use that data to optimize before scaling up.');
+  if (Number(proj.roas) < 1 && Number(proj.ltvRoas) >= 2) recs.push('Your strong LTV (' + proj.ltvRoas + 'x ROAS) justifies the initial acquisition cost. Track cohort revenue over time to prove ROI to stakeholders.');
+  if (state.selectedKeywords.length > 0) {
+    const highComp = state.selectedKeywords.filter(k => k.comp === 'high');
+    if (highComp.length > state.selectedKeywords.length * 0.5) recs.push('Many of your target keywords are high-competition. Consider adding long-tail variations to find lower-cost opportunities.');
+  }
+  if (recs.length === 0) recs.push('Your business profile and goals are well-aligned. Start with the recommended budget and review performance after 30 days.');
   return recs;
 }
 </script>
