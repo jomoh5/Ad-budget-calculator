@@ -873,6 +873,7 @@ const KEYWORD_DATA = {
 };
 
 let selectedKeywords = [];
+let mediaMix = { search: 50, display: 15, shopping: 0, pmax: 20, youtube: 10, discovery: 5 };
 
 // State
 let currentStep = 1;
@@ -898,25 +899,72 @@ document.querySelectorAll('input[inputmode="numeric"]').forEach(input => {
   });
 });
 
+// --- B2B/B2C toggle ---
+document.querySelectorAll('input[name="biz-model"]').forEach(r => {
+  r.addEventListener('change', () => {
+    document.getElementById('b2c-fields').style.display = r.value === 'b2c' ? '' : 'none';
+    document.getElementById('b2b-fields').style.display = r.value === 'b2b' ? '' : 'none';
+  });
+});
+
 // --- Budget constraint toggle ---
 document.getElementById('has-max-budget').addEventListener('change', function() {
   document.getElementById('max-budget-field').classList.toggle('visible', this.checked);
 });
 
-// --- Keyword section: show when industry selected, populate pills ---
-document.getElementById('industry').addEventListener('change', function() {
-  const sec = document.getElementById('keyword-section');
-  if (this.value && KEYWORD_DATA[this.value]) {
-    sec.style.display = '';
-    populateKeywords(this.value);
-  } else {
-    sec.style.display = 'none';
+// --- Keyword generation from product description ---
+function generateKeywordsFromDescription(desc, industry) {
+  const ind = INDUSTRY_DATA[industry];
+  if (!ind) return [];
+  const baseKws = KEYWORD_DATA[industry] || [];
+  const words = desc.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 2);
+  const stopWords = new Set(['the','and','for','are','but','not','you','all','can','her','was','one','our','out','its','has','his','how','who','oil','did','get','let','say','she','too','use','way','may','had','any','own','new','old','big','few','far','yet','nor','per','try','ask','set','run','got','put','end','why','saw','own','men','now','off','two','low','top','met','hit','sit','ran','ten','yes','ago','ago','add','add','buy','pay','due','aim','win','job','fit','cut','red','hot','bad','sir','mrs','led','act','war','arm','key','cup','son','age','art','dog','ear','eye','god','hat','ice','joy','kid','leg','lip','map','net','odd','pet','row','sky','tie','van','web','won','zoo']);
+  const meaningful = words.filter(w => !stopWords.has(w));
+  const generated = [];
+  const usedKws = new Set();
+  // Score base keywords by relevance to description
+  baseKws.forEach(k => {
+    const kwWords = k.kw.toLowerCase().split(/\s+/);
+    const overlap = kwWords.filter(w => meaningful.some(m => w.includes(m) || m.includes(w))).length;
+    if (overlap > 0) { generated.push({...k, score: overlap * 2}); usedKws.add(k.kw); }
+  });
+  // Add remaining base keywords with lower score
+  baseKws.forEach(k => {
+    if (!usedKws.has(k.kw)) { generated.push({...k, score: 1}); usedKws.add(k.kw); }
+  });
+  // Generate new keywords from description phrases
+  if (meaningful.length >= 2) {
+    for (let i = 0; i < meaningful.length - 1 && generated.length < 15; i++) {
+      const phrase = meaningful[i] + ' ' + meaningful[i+1];
+      if (!usedKws.has(phrase)) {
+        generated.push({ kw: phrase, cpc: [Math.round(ind.avgCPC*0.5*100)/100, Math.round(ind.avgCPC*1.2*100)/100], comp: 'medium', score: 3, custom: true });
+        usedKws.add(phrase);
+      }
+    }
+    // Add "near me" and service-type variants
+    const mainTerm = meaningful.slice(0, 2).join(' ');
+    [{suf:' near me',comp:'high',mult:1.3},{suf:' services',comp:'medium',mult:1.0},{suf:' cost',comp:'medium',mult:0.8},{suf:' reviews',comp:'low',mult:0.5}].forEach(v => {
+      const kw = mainTerm + v.suf;
+      if (!usedKws.has(kw) && generated.length < 15) {
+        generated.push({ kw, cpc: [Math.round(ind.avgCPC*v.mult*0.6*100)/100, Math.round(ind.avgCPC*v.mult*1.4*100)/100], comp: v.comp, score: 2, custom: true });
+        usedKws.add(kw);
+      }
+    });
   }
-});
-function populateKeywords(industry) {
+  generated.sort((a, b) => (b.score||0) - (a.score||0));
+  return generated.slice(0, 15);
+}
+
+function populateKeywords(industry, desc) {
   const container = document.getElementById('keyword-pills');
-  const kws = KEYWORD_DATA[industry] || [];
+  let kws;
+  if (desc && desc.trim().length > 5) {
+    kws = generateKeywordsFromDescription(desc, industry);
+  } else {
+    kws = (KEYWORD_DATA[industry] || []).map(k => ({...k}));
+  }
   selectedKeywords = [];
+  window._currentKws = kws;
   container.innerHTML = kws.map((k, i) =>
     `<div class="keyword-pill" data-idx="${i}" onclick="toggleKeyword(this, ${i})">
       ${k.kw} <span class="kw-cpc">$${k.cpc[0]}-$${k.cpc[1]}</span>
@@ -925,8 +973,7 @@ function populateKeywords(industry) {
 }
 function toggleKeyword(el, idx) {
   el.classList.toggle('selected');
-  const industry = document.getElementById('industry').value;
-  const kw = KEYWORD_DATA[industry][idx];
+  const kw = window._currentKws[idx];
   if (el.classList.contains('selected')) {
     selectedKeywords.push(kw);
   } else {
@@ -939,17 +986,17 @@ function addCustomKeyword() {
   if (!val) return;
   const industry = document.getElementById('industry').value;
   const ind = INDUSTRY_DATA[industry];
-  const customKw = { kw: val, cpc: [Math.round(ind.avgCPC * 0.6 * 100) / 100, Math.round(ind.avgCPC * 1.4 * 100) / 100], comp: 'medium', custom: true };
+  const customKw = { kw: val, cpc: [Math.round(ind.avgCPC*0.6*100)/100, Math.round(ind.avgCPC*1.4*100)/100], comp: 'medium', custom: true };
   selectedKeywords.push(customKw);
+  if (!window._currentKws) window._currentKws = [];
+  window._currentKws.push(customKw);
   const container = document.getElementById('keyword-pills');
   const pill = document.createElement('div');
+  const idx = window._currentKws.length - 1;
   pill.className = 'keyword-pill selected';
+  pill.dataset.idx = idx;
   pill.innerHTML = `${val} <span class="kw-cpc">$${customKw.cpc[0]}-$${customKw.cpc[1]}</span>`;
-  pill.onclick = function() {
-    this.classList.toggle('selected');
-    if (this.classList.contains('selected')) { selectedKeywords.push(customKw); }
-    else { selectedKeywords = selectedKeywords.filter(k => k.kw !== customKw.kw); }
-  };
+  pill.onclick = function() { toggleKeyword(this, idx); };
   container.appendChild(pill);
   input.value = '';
 }
@@ -957,22 +1004,33 @@ document.getElementById('custom-keyword').addEventListener('keydown', function(e
   if (e.key === 'Enter') { e.preventDefault(); addCustomKeyword(); }
 });
 
-// Goal label updater
-document.querySelectorAll('input[name="goal"]').forEach(r => {
-  r.addEventListener('change', () => {
-    const labels = { leads:'Target leads per month', transactions:'Target sales per month', traffic:'Target monthly visitors', awareness:'Target monthly impressions' };
-    document.getElementById('target-label').textContent = labels[r.value] || labels.leads;
-    document.getElementById('cpa-field').style.display = (r.value==='leads'||r.value==='transactions') ? '' : 'none';
-  });
-});
+// --- Goal label updater (multi-select) ---
+function getSelectedGoals() {
+  return Array.from(document.querySelectorAll('input[name="goal"]:checked')).map(c => c.value);
+}
+function getPrimaryGoal() {
+  const goals = getSelectedGoals();
+  const priority = ['leads','transactions','signups','demand','scale','lead-quality','traffic','awareness','measure'];
+  for (const g of priority) { if (goals.includes(g)) return g; }
+  return goals[0] || 'leads';
+}
+function updateGoalLabel() {
+  const goal = getPrimaryGoal();
+  const labels = { leads:'Target leads per month', transactions:'Target sales per month', traffic:'Target monthly visitors', awareness:'Target monthly impressions', signups:'Target signups per month', demand:'Target qualified leads per month', scale:'Target new customers per month', 'lead-quality':'Target qualified leads per month', measure:'Target conversions to track per month' };
+  document.getElementById('target-label').textContent = labels[goal] || 'Target outcome per month';
+  const showCPA = ['leads','transactions','signups','demand','scale','lead-quality'].includes(goal);
+  document.getElementById('cpa-field').style.display = showCPA ? '' : 'none';
+}
+document.querySelectorAll('input[name="goal"]').forEach(c => { c.addEventListener('change', updateGoalLabel); });
 
 function goToStep(step) {
   if (step === 2 && !validateStep1()) return;
   if (step === 2) {
     const industry = document.getElementById('industry').value;
-    if (industry && KEYWORD_DATA[industry]) {
+    const desc = document.getElementById('product-desc').value;
+    if (industry) {
       document.getElementById('keyword-section').style.display = '';
-      if (document.getElementById('keyword-pills').children.length === 0) populateKeywords(industry);
+      populateKeywords(industry, desc);
     }
   }
   if (step === 3 && !validateStep2()) return;
@@ -1002,7 +1060,7 @@ function validateStep1() {
   if (!document.getElementById('industry').value) { setInvalid('industry', true); ok = false; } else setInvalid('industry', false);
   if (parseNum(document.getElementById('revenue').value) <= 0) { setInvalid('revenue', true); ok = false; } else setInvalid('revenue', false);
   if (parseNum(document.getElementById('aov').value) <= 0) { setInvalid('aov', true); ok = false; } else setInvalid('aov', false);
-  if (parseNum(document.getElementById('ltv').value) <= 0) { setInvalid('ltv', true); ok = false; } else setInvalid('ltv', false);
+  // LTV is optional now - no validation needed
   return ok;
 }
 
@@ -1013,17 +1071,36 @@ function validateStep2() {
   return true;
 }
 
+function getCheckedValues(name) {
+  return Array.from(document.querySelectorAll('input[name="'+name+'"]:checked')).map(c => c.value);
+}
+
 function getState() {
   const hasMax = document.getElementById('has-max-budget').checked;
+  const aov = parseNum(document.getElementById('aov').value);
+  const ltvRaw = parseNum(document.getElementById('ltv').value);
+  const ltv = ltvRaw > 0 ? ltvRaw : aov * 3;
+  const bizModel = document.querySelector('input[name="biz-model"]:checked').value;
   return {
     industry: document.getElementById('industry').value,
+    productDesc: document.getElementById('product-desc').value,
     revenue: parseNum(document.getElementById('revenue').value),
-    aov: parseNum(document.getElementById('aov').value),
-    ltv: parseNum(document.getElementById('ltv').value),
+    aov: aov, ltv: ltv, ltvProvided: ltvRaw > 0,
     currentSpend: parseNum(document.getElementById('current-spend').value),
+    pricePoint: parseNum(document.getElementById('price-point').value),
     cvr: Number(document.getElementById('cvr').value) || 0,
     salesCycle: document.getElementById('sales-cycle').value,
-    goal: document.querySelector('input[name="goal"]:checked').value,
+    bizModel: bizModel,
+    geoCountry: document.getElementById('geo-country').value,
+    geoRegion: document.getElementById('geo-region').value,
+    ageRanges: bizModel === 'b2c' ? getCheckedValues('age') : [],
+    income: bizModel === 'b2c' ? document.getElementById('income').value : '',
+    companySizes: bizModel === 'b2b' ? getCheckedValues('company-size') : [],
+    targetIndustries: bizModel === 'b2b' ? getCheckedValues('target-ind') : [],
+    titles: bizModel === 'b2b' ? getCheckedValues('titles') : [],
+    dealSize: bizModel === 'b2b' ? document.getElementById('deal-size').value : '',
+    goals: getSelectedGoals(),
+    primaryGoal: getPrimaryGoal(),
     targetOutcome: parseNum(document.getElementById('target-outcome').value),
     targetCPA: parseNum(document.getElementById('target-cpa').value),
     hasMaxBudget: hasMax,
@@ -1045,10 +1122,10 @@ function calculateBudget(state) {
   const cpc = getEffectiveCPC(state);
 
   let goalBudget;
-  if (state.goal === 'awareness') {
+  if (state.primaryGoal === 'awareness') {
     const cpm = cpc * (ind.avgCTR / 100) * 1000;
     goalBudget = (state.targetOutcome / 1000) * cpm;
-  } else if (state.goal === 'traffic') {
+  } else if (state.primaryGoal === 'traffic') {
     goalBudget = state.targetOutcome * cpc;
   } else {
     const neededClicks = state.targetOutcome / (cvr / 100);
@@ -1110,7 +1187,84 @@ function realityCheck(state, proj, budgets) {
 function fmt(n) { return Number(n).toLocaleString('en-US'); }
 
 function getGoalLabel(goal) {
-  return { leads:'leads', transactions:'sales', traffic:'visitors', awareness:'impressions' }[goal] || 'conversions';
+  return { leads:'leads', transactions:'sales', traffic:'visitors', awareness:'impressions', signups:'signups', demand:'qualified leads', scale:'new customers', 'lead-quality':'qualified leads', measure:'conversions' }[goal] || 'conversions';
+}
+
+// --- Media mix recommendation based on product description and goals ---
+function getRecommendedMix(state) {
+  const desc = (state.productDesc || '').toLowerCase();
+  const goals = state.goals;
+  const isEcom = state.industry === 'ecommerce' || /shop|store|buy|product|sell|retail/i.test(desc);
+  const isLocal = /near me|local|city|area|region/i.test(desc) || ['restaurants','dental','automotive','beauty','fitness'].includes(state.industry);
+  const isB2B = state.bizModel === 'b2b';
+  const wantsAwareness = goals.includes('awareness');
+  const wantsLeads = goals.includes('leads') || goals.includes('lead-quality') || goals.includes('demand');
+
+  if (isEcom) return { search: 25, display: 5, shopping: 30, pmax: 25, youtube: 10, discovery: 5 };
+  if (isB2B) return { search: 55, display: 15, shopping: 0, pmax: 10, youtube: 15, discovery: 5 };
+  if (wantsAwareness) return { search: 25, display: 20, shopping: 0, pmax: 15, youtube: 30, discovery: 10 };
+  if (isLocal) return { search: 55, display: 10, shopping: 0, pmax: 25, youtube: 5, discovery: 5 };
+  if (wantsLeads) return { search: 50, display: 10, shopping: 0, pmax: 25, youtube: 10, discovery: 5 };
+  return { search: 45, display: 15, shopping: 0, pmax: 20, youtube: 15, discovery: 5 };
+}
+
+const CAMPAIGN_LABELS = { search:'Search', display:'Display', shopping:'Shopping', pmax:'Performance Max', youtube:'YouTube', discovery:'Demand Gen' };
+
+function renderMediaMix(budget, mix) {
+  const types = Object.keys(mix).filter(k => mix[k] > 0);
+  return `<div class="media-mix">
+    <h3>Recommended Campaign Mix</h3>
+    <p class="hint">Adjust sliders to see how different allocations affect your projected results.</p>
+    ${types.map(t => {
+      const amt = Math.round(budget * mix[t] / 100);
+      return `<div class="mix-slider-row">
+        <span class="mix-slider-label">${CAMPAIGN_LABELS[t]}</span>
+        <div class="mix-slider-bar"><input type="range" min="0" max="100" value="${mix[t]}" data-type="${t}" oninput="updateMixSlider(this)"></div>
+        <span class="mix-slider-pct" id="mix-pct-${t}">${mix[t]}%</span>
+        <span class="mix-slider-amt" id="mix-amt-${t}">$${fmt(amt)}</span>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function updateMixSlider(el) {
+  const type = el.dataset.type;
+  mediaMix[type] = Number(el.value);
+  // Normalize to 100%
+  const total = Object.values(mediaMix).reduce((s,v) => s + v, 0);
+  const budget = window._activeBudget || 0;
+  Object.keys(mediaMix).forEach(k => {
+    const pctEl = document.getElementById('mix-pct-' + k);
+    const amtEl = document.getElementById('mix-amt-' + k);
+    if (pctEl) {
+      const normalized = total > 0 ? Math.round(mediaMix[k] / total * 100) : 0;
+      pctEl.textContent = normalized + '%';
+      amtEl.textContent = '$' + fmt(Math.round(budget * normalized / 100));
+    }
+  });
+}
+
+// --- Email modal ---
+function openEmailModal() {
+  document.getElementById('email-modal').classList.add('visible');
+  document.getElementById('email-input').focus();
+}
+function closeEmailModal() {
+  document.getElementById('email-modal').classList.remove('visible');
+}
+function submitEmail() {
+  const email = document.getElementById('email-input').value.trim();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    document.getElementById('email-input').style.borderColor = '#ea4335';
+    return;
+  }
+  document.getElementById('email-input').style.borderColor = '#34a853';
+  const status = document.getElementById('email-status');
+  status.style.display = 'block';
+  status.textContent = 'Results saved! Check your email shortly.';
+  // Store the email for lead capture
+  console.log('Lead captured:', email, window._state);
+  setTimeout(() => { closeEmailModal(); }, 2000);
 }
 
 function renderResults() {
@@ -1127,7 +1281,7 @@ function renderResults() {
   const recs = getRecommendations(state, proj, ind, budgets, isCapped);
 
   // Build consultation narrative
-  const goalLabel = getGoalLabel(state.goal);
+  const goalLabel = getGoalLabel(state.primaryGoal);
   let narrative = '';
   if (isOverBudget) {
     narrative = `<div style="background:#fce8e6;padding:16px;border-radius:8px;border-left:4px solid #ea4335;margin-bottom:20px;font-size:0.9rem;color:#202124;">
@@ -1214,24 +1368,33 @@ function renderResults() {
     </div>
     ${cpcRangeHTML}
     ${kwHTML}
+    ${renderMediaMix(activeBudget, mediaMix)}
     ${achievableHTML}
     ${checks.length ? `<div class="reality-checks"><h3>Reality Check</h3>${checks.map(c=>'<div class="reality-check-item '+c.type+'">'+c.msg+'</div>').join('')}</div>` : ''}
+    ${!state.ltvProvided ? '<div class="reality-checks" style="border-left-color:#1a73e8;background:#e8f0fe;"><h3 style="color:#1a73e8;">Note on LTV</h3><div class="reality-check-item info">Customer Lifetime Value was estimated at 3x your average order value ($'+fmt(state.ltv)+'). For more accurate ROI projections, enter your actual LTV in Step 1.</div></div>' : ''}
     ${recs.length ? `<div class="recommendations"><h3>Our Recommendations</h3><ul>${recs.map(r=>'<li>'+r+'</li>').join('')}</ul></div>` : ''}
     <p class="disclaimer">Estimates based on 2025 industry benchmarks. Actual results vary based on ad quality, landing pages, competition, and seasonality. This tool provides directional guidance, not a guarantee of results.</p>
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="goToStep(1)">Start Over</button>
-      <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
+      <button class="btn btn-primary" onclick="openEmailModal()">Save PDF / Email Results</button>
     </div>
   `;
 
+  mediaMix = getRecommendedMix(state);
+  // Re-render media mix with recommended values
+  const mixContainer = container.querySelector('.media-mix');
+  if (mixContainer) mixContainer.outerHTML = renderMediaMix(activeBudget, mediaMix);
+
   window._tiers = { conservative: budgets.conservative, recommended: budgets.recommended, aggressive: budgets.aggressive };
   window._state = state;
+  window._activeBudget = activeBudget;
 }
 
 function selectTier(el) {
   document.querySelectorAll('.tier-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
   const budget = window._tiers[el.dataset.tier];
+  window._activeBudget = budget;
   const proj = projectMetrics(budget, window._state);
   document.getElementById('res-budget').innerHTML = '$'+fmt(budget)+'<span style="font-size:0.9rem;font-weight:400">/month</span>';
   document.getElementById('res-clicks').textContent = fmt(proj.clicks);
@@ -1240,6 +1403,15 @@ function selectTier(el) {
   document.getElementById('res-roas').textContent = proj.roas+'x';
   document.getElementById('res-revenue').textContent = '$'+fmt(proj.revenue);
   document.getElementById('res-ltv-roas').textContent = proj.ltvRoas+'x';
+  // Update media mix amounts
+  Object.keys(mediaMix).forEach(k => {
+    const amtEl = document.getElementById('mix-amt-' + k);
+    if (amtEl) {
+      const total = Object.values(mediaMix).reduce((s,v) => s + v, 0);
+      const normalized = total > 0 ? Math.round(mediaMix[k] / total * 100) : 0;
+      amtEl.textContent = '$' + fmt(Math.round(budget * normalized / 100));
+    }
+  });
 }
 
 function getRecommendations(state, proj, ind, budgets, isCapped) {
@@ -1250,7 +1422,7 @@ function getRecommendations(state, proj, ind, budgets, isCapped) {
     recs.push('Set up conversion tracking immediately so Google can learn which clicks are most valuable for your business.');
   }
   if (cvr < ind.avgCVR) recs.push('Your conversion rate is below the '+ind.label+' average ('+ind.avgCVR+'%). Improving your landing page could be more impactful than increasing ad spend.');
-  if (state.goal === 'awareness') recs.push('For brand awareness, combine Search with Display and YouTube campaigns. Consider allocating 60% to Search and 40% to Display/Video.');
+  if (state.primaryGoal === 'awareness') recs.push('For brand awareness, combine Search with Display and YouTube campaigns. Consider allocating 60% to Search and 40% to Display/Video.');
   if (proj.conversions < 30 && !isCapped) recs.push('At this budget level, start with exact-match keywords to maximize relevance per dollar. Expand to phrase match once you identify winners.');
   if (state.salesCycle === '1-3months' || state.salesCycle === '3+months') recs.push('Set up remarketing lists (RLSA) to stay in front of prospects during your '+state.salesCycle.replace('-',' to ').replace('+', '+')+' sales cycle.');
   if (state.currentSpend === 0) recs.push('As a new advertiser, start with the conservative budget for 2-4 weeks. Use that data to optimize before scaling up.');
