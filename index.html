@@ -470,9 +470,10 @@
       </div>
 
       <div class="field">
-        <label for="product-desc">Describe your product or service</label>
-        <textarea id="product-desc" rows="2" placeholder="e.g. We sell custom kitchen cabinets to homeowners in the Dallas area" style="width:100%;padding:12px;border:1px solid #dadce0;border-radius:8px;font-size:1rem;font-family:inherit;resize:vertical;"></textarea>
-        <div class="hint">1-2 sentences helps us suggest better keywords and campaign types.</div>
+        <label for="product-desc">Describe your product or service <span style="color:#ea4335;">*</span></label>
+        <textarea id="product-desc" rows="3" placeholder="e.g. We sell custom kitchen cabinets to homeowners in the Dallas area. Our average project is $15K and most customers find us through referrals or Google. www.example.com" style="width:100%;padding:12px;border:1px solid #dadce0;border-radius:8px;font-size:1rem;font-family:inherit;resize:vertical;"></textarea>
+        <div class="hint">The more detail the better. Feel free to include URLs to your website or product pages. This is an important field — it informs how we interpret your other answers and helps us refine our keyword suggestions, campaign mix, and budget recommendations.</div>
+        <div class="error-msg">Please describe your product or service.</div>
       </div>
 
       <div class="field">
@@ -489,14 +490,12 @@
         <div class="input-prefix">
           <input type="text" id="aov" placeholder="e.g. 150" inputmode="numeric">
         </div>
-        <div class="hint">Average revenue per customer transaction, sale, or engagement.</div>
         <div class="error-msg">Please enter a positive number.</div>
       </div>
 
       <div class="field">
         <label for="monthly-transactions">Transactions Per Month</label>
         <input type="text" id="monthly-transactions" placeholder="e.g. 200" inputmode="numeric">
-        <div class="hint">Approximate number of sales, bookings, or completed engagements per month.</div>
       </div>
 
       <div class="field">
@@ -1056,6 +1055,8 @@ function setInvalid(id, invalid) {
 function validateStep1() {
   let ok = true;
   if (!document.getElementById('industry').value) { setInvalid('industry', true); ok = false; } else setInvalid('industry', false);
+  const desc = document.getElementById('product-desc').value.trim();
+  if (desc.length < 5) { setInvalid('product-desc', true); ok = false; } else setInvalid('product-desc', false);
   if (parseNum(document.getElementById('revenue').value) <= 0) { setInvalid('revenue', true); ok = false; } else setInvalid('revenue', false);
   if (parseNum(document.getElementById('aov').value) <= 0) { setInvalid('aov', true); ok = false; } else setInvalid('aov', false);
   // LTV is optional now - no validation needed
