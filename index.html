@@ -288,6 +288,67 @@
     font-style: italic;
   }
 
+  /* Goal options grid fix */
+  .goal-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .goal-option {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; border: 2px solid #dadce0; border-radius: 8px;
+    cursor: pointer; transition: all 0.2s; font-size: 0.875rem; margin: 0;
+  }
+  .goal-option:has(input:checked) { border-color: #1a73e8; background: #e8f0fe; }
+  .goal-option input { accent-color: #1a73e8; margin: 0; flex-shrink: 0; }
+  .goal-option span { line-height: 1.3; }
+  @media (max-width: 600px) { .goal-options { grid-template-columns: 1fr; } }
+
+  /* Checkbox pill grid for audience targeting */
+  .checkbox-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .cb-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border: 1px solid #dadce0; border-radius: 20px;
+    font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+    background: #fff; color: #5f6368;
+  }
+  .cb-pill:has(input:checked) { border-color: #1a73e8; background: #e8f0fe; color: #1a73e8; font-weight: 500; }
+  .cb-pill input { display: none; }
+
+  /* Media mix sliders */
+  .media-mix { margin-top: 24px; }
+  .media-mix h3 { font-size: 0.95rem; margin-bottom: 4px; }
+  .media-mix .hint { font-size: 0.8rem; color: #80868b; margin-bottom: 16px; }
+  .mix-slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .mix-slider-label { width: 140px; font-size: 0.85rem; color: #202124; flex-shrink: 0; }
+  .mix-slider-bar { flex: 1; }
+  .mix-slider-bar input[type="range"] {
+    width: 100%; height: 6px; -webkit-appearance: none; appearance: none;
+    background: #dadce0; border-radius: 3px; outline: none;
+  }
+  .mix-slider-bar input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: #1a73e8; cursor: pointer; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .mix-slider-pct { width: 48px; text-align: right; font-size: 0.85rem; font-weight: 600; color: #1a73e8; }
+  .mix-slider-amt { width: 80px; text-align: right; font-size: 0.78rem; color: #5f6368; }
+
+  /* Email modal */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;
+    z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .modal-overlay.visible { opacity: 1; pointer-events: auto; }
+  .modal {
+    background: #fff; border-radius: 12px; padding: 32px; max-width: 420px; width: 90%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+  .modal h3 { font-size: 1.1rem; margin-bottom: 8px; }
+  .modal p { font-size: 0.875rem; color: #5f6368; margin-bottom: 16px; }
+  .modal input[type="email"] {
+    width: 100%; padding: 12px; border: 1px solid #dadce0; border-radius: 8px;
+    font-size: 1rem; margin-bottom: 12px;
+  }
+  .modal input[type="email"]:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.15); }
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+
   /* Budget constraint toggle */
   .budget-toggle {
     display: flex; align-items: center; gap: 10px;
@@ -409,6 +470,12 @@
       </div>
 
       <div class="field">
+        <label for="product-desc">Describe your product or service</label>
+        <textarea id="product-desc" rows="2" placeholder="e.g. We sell custom kitchen cabinets to homeowners in the Dallas area" style="width:100%;padding:12px;border:1px solid #dadce0;border-radius:8px;font-size:1rem;font-family:inherit;resize:vertical;"></textarea>
+        <div class="hint">1-2 sentences helps us suggest better keywords and campaign types.</div>
+      </div>
+
+      <div class="field">
         <label for="revenue">Monthly Revenue</label>
         <div class="input-prefix">
           <input type="text" id="revenue" placeholder="e.g. 50,000" inputmode="numeric">
@@ -427,12 +494,11 @@
       </div>
 
       <div class="field">
-        <label for="ltv">Customer Lifetime Value</label>
+        <label for="ltv">Customer Lifetime Value (optional)</label>
         <div class="input-prefix">
-          <input type="text" id="ltv" placeholder="e.g. 500" inputmode="numeric">
+          <input type="text" id="ltv" placeholder="Leave blank if unknown" inputmode="numeric">
         </div>
-        <div class="hint">Total expected revenue from one customer over time.</div>
-        <div class="error-msg">Please enter a positive number.</div>
+        <div class="hint">Total expected revenue from one customer over time. If blank, we'll estimate from your AOV.</div>
       </div>
 
       <div class="field">
@@ -441,6 +507,14 @@
           <input type="text" id="current-spend" placeholder="0 if none" inputmode="numeric" value="0">
         </div>
         <div class="error-msg">Please enter 0 or a positive number.</div>
+      </div>
+
+      <div class="field">
+        <label for="price-point">Product/Service Price Point</label>
+        <div class="input-prefix">
+          <input type="text" id="price-point" placeholder="e.g. 200" inputmode="numeric">
+        </div>
+        <div class="hint">Typical price a customer pays for your main product/service.</div>
       </div>
 
       <div class="field">
@@ -453,11 +527,116 @@
         <label for="sales-cycle">Sales Cycle Length</label>
         <select id="sales-cycle">
           <option value="immediate">Immediate</option>
-          <option value="1-7days">1–7 days</option>
-          <option value="1-4weeks" selected>1–4 weeks</option>
-          <option value="1-3months">1–3 months</option>
+          <option value="1-7days">1-7 days</option>
+          <option value="1-4weeks" selected>1-4 weeks</option>
+          <option value="1-3months">1-3 months</option>
           <option value="3+months">3+ months</option>
         </select>
+      </div>
+
+      <!-- Business Model & Audience -->
+      <div class="step-title" style="margin-top:28px;">Audience Targeting</div>
+
+      <div class="field">
+        <label>Business Model</label>
+        <div style="display:flex;gap:12px;">
+          <label class="goal-option" style="flex:1;margin:0;">
+            <input type="radio" name="biz-model" value="b2c" checked>
+            <span>B2C (Consumers)</span>
+          </label>
+          <label class="goal-option" style="flex:1;margin:0;">
+            <input type="radio" name="biz-model" value="b2b">
+            <span>B2B (Businesses)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- B2C fields -->
+      <div id="b2c-fields">
+        <div class="field">
+          <label>Target Age Ranges</label>
+          <div class="checkbox-grid">
+            <label class="cb-pill"><input type="checkbox" name="age" value="18-24"><span>18-24</span></label>
+            <label class="cb-pill"><input type="checkbox" name="age" value="25-34" checked><span>25-34</span></label>
+            <label class="cb-pill"><input type="checkbox" name="age" value="35-44" checked><span>35-44</span></label>
+            <label class="cb-pill"><input type="checkbox" name="age" value="45-54"><span>45-54</span></label>
+            <label class="cb-pill"><input type="checkbox" name="age" value="55-64"><span>55-64</span></label>
+            <label class="cb-pill"><input type="checkbox" name="age" value="65+"><span>65+</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="income">Household Income</label>
+          <select id="income">
+            <option value="any">Any</option>
+            <option value="under50k">Under $50K</option>
+            <option value="50k-100k">$50K - $100K</option>
+            <option value="100k-150k">$100K - $150K</option>
+            <option value="150k+">$150K+</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- B2B fields -->
+      <div id="b2b-fields" style="display:none;">
+        <div class="field">
+          <label>Target Company Size</label>
+          <div class="checkbox-grid">
+            <label class="cb-pill"><input type="checkbox" name="company-size" value="startup" checked><span>Startup (&lt;50)</span></label>
+            <label class="cb-pill"><input type="checkbox" name="company-size" value="smb"><span>SMB (50-200)</span></label>
+            <label class="cb-pill"><input type="checkbox" name="company-size" value="midmarket"><span>Mid-market (200-2K)</span></label>
+            <label class="cb-pill"><input type="checkbox" name="company-size" value="enterprise"><span>Enterprise (2K+)</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Target Industries</label>
+          <div class="checkbox-grid">
+            <label class="cb-pill"><input type="checkbox" name="target-ind" value="technology"><span>Technology</span></label>
+            <label class="cb-pill"><input type="checkbox" name="target-ind" value="healthcare"><span>Healthcare</span></label>
+            <label class="cb-pill"><input type="checkbox" name="target-ind" value="financial"><span>Financial Services</span></label>
+            <label class="cb-pill"><input type="checkbox" name="target-ind" value="manufacturing"><span>Manufacturing</span></label>
+            <label class="cb-pill"><input type="checkbox" name="target-ind" value="retail"><span>Retail</span></label>
+            <label class="cb-pill"><input type="checkbox" name="target-ind" value="professional"><span>Professional Services</span></label>
+            <label class="cb-pill"><input type="checkbox" name="target-ind" value="education"><span>Education</span></label>
+            <label class="cb-pill"><input type="checkbox" name="target-ind" value="other"><span>Other</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Decision-Maker Titles</label>
+          <div class="checkbox-grid">
+            <label class="cb-pill"><input type="checkbox" name="titles" value="c-suite"><span>C-Suite</span></label>
+            <label class="cb-pill"><input type="checkbox" name="titles" value="vp-director"><span>VP / Director</span></label>
+            <label class="cb-pill"><input type="checkbox" name="titles" value="manager" checked><span>Manager</span></label>
+            <label class="cb-pill"><input type="checkbox" name="titles" value="ic"><span>Individual Contributor</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="deal-size">Average Deal Size</label>
+          <select id="deal-size">
+            <option value="1k-10k">$1K - $10K</option>
+            <option value="10k-50k" selected>$10K - $50K</option>
+            <option value="50k-250k">$50K - $250K</option>
+            <option value="250k+">$250K+</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Geography (both) -->
+      <div class="field">
+        <label for="geo-country">Target Geography</label>
+        <select id="geo-country">
+          <option value="US">United States</option>
+          <option value="CA">Canada</option>
+          <option value="UK">United Kingdom</option>
+          <option value="AU">Australia</option>
+          <option value="DE">Germany</option>
+          <option value="FR">France</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="field" id="geo-region-field">
+        <label for="geo-region">Target Regions (optional)</label>
+        <input type="text" id="geo-region" placeholder="e.g. California, Texas, New York">
+        <div class="hint">Comma-separated states/regions, or leave blank for nationwide.</div>
       </div>
 
       <div class="btn-row">
@@ -472,36 +651,45 @@
       <div class="step-title">Campaign Goals</div>
 
       <div class="field">
-        <label>Primary Goal</label>
+        <label>Campaign Goals (select all that apply)</label>
         <div class="goal-options" id="goal-options">
           <label class="goal-option">
-            <input type="radio" name="goal" value="leads" checked>
+            <input type="checkbox" name="goal" value="leads" checked>
             <span>Lead Generation</span>
           </label>
           <label class="goal-option">
-            <input type="radio" name="goal" value="transactions">
+            <input type="checkbox" name="goal" value="transactions">
             <span>Sales / Transactions</span>
           </label>
           <label class="goal-option">
-            <input type="radio" name="goal" value="traffic">
+            <input type="checkbox" name="goal" value="traffic">
             <span>Website Traffic</span>
           </label>
           <label class="goal-option">
-            <input type="radio" name="goal" value="awareness">
+            <input type="checkbox" name="goal" value="awareness">
             <span>Brand Awareness</span>
           </label>
+          <label class="goal-option">
+            <input type="checkbox" name="goal" value="lead-quality">
+            <span>Improve Lead Quality</span>
+          </label>
+          <label class="goal-option">
+            <input type="checkbox" name="goal" value="scale">
+            <span>Scale Acquisition</span>
+          </label>
+          <label class="goal-option">
+            <input type="checkbox" name="goal" value="signups">
+            <span>Drive Signups</span>
+          </label>
+          <label class="goal-option">
+            <input type="checkbox" name="goal" value="measure">
+            <span>Measure More Effectively</span>
+          </label>
+          <label class="goal-option">
+            <input type="checkbox" name="goal" value="demand">
+            <span>Capture Demand</span>
+          </label>
         </div>
-        <style>
-          .goal-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-          .goal-option {
-            display: flex; align-items: center; gap: 8px;
-            padding: 12px; border: 2px solid #dadce0; border-radius: 8px;
-            cursor: pointer; transition: all 0.2s; font-size: 0.9rem;
-          }
-          .goal-option:has(input:checked) { border-color: #1a73e8; background: #e8f0fe; }
-          .goal-option input { accent-color: #1a73e8; }
-          @media (max-width: 600px) { .goal-options { grid-template-columns: 1fr; } }
-        </style>
       </div>
 
       <div class="field">
@@ -553,6 +741,20 @@
   <div class="wizard-step" id="step-3">
     <div class="card" id="results-card">
       <!-- Filled by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Email modal -->
+<div class="modal-overlay" id="email-modal">
+  <div class="modal">
+    <h3>Save Your Results</h3>
+    <p>Enter your email to receive a PDF copy of your personalized Google Ads budget recommendation.</p>
+    <input type="email" id="email-input" placeholder="you@company.com">
+    <div id="email-status" style="font-size:0.8rem;color:#34a853;margin-bottom:8px;display:none;"></div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeEmailModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitEmail()">Send Results</button>
     </div>
   </div>
 </div>
