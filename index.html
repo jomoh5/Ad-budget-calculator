@@ -480,17 +480,23 @@
         <div class="input-prefix">
           <input type="text" id="revenue" placeholder="e.g. 50,000" inputmode="numeric">
         </div>
-        <div class="hint">Your average monthly business revenue.</div>
+        <div class="hint">Your approximate monthly revenue before advertising costs.</div>
         <div class="error-msg">Please enter a positive number.</div>
       </div>
 
       <div class="field">
-        <label for="aov">Average Order Value</label>
+        <label for="aov">Average Transaction Value</label>
         <div class="input-prefix">
           <input type="text" id="aov" placeholder="e.g. 150" inputmode="numeric">
         </div>
-        <div class="hint">Average revenue per customer transaction.</div>
+        <div class="hint">Average revenue per customer transaction, sale, or engagement.</div>
         <div class="error-msg">Please enter a positive number.</div>
+      </div>
+
+      <div class="field">
+        <label for="monthly-transactions">Transactions Per Month</label>
+        <input type="text" id="monthly-transactions" placeholder="e.g. 200" inputmode="numeric">
+        <div class="hint">Approximate number of sales, bookings, or completed engagements per month.</div>
       </div>
 
       <div class="field">
@@ -498,11 +504,11 @@
         <div class="input-prefix">
           <input type="text" id="ltv" placeholder="Leave blank if unknown" inputmode="numeric">
         </div>
-        <div class="hint">Total expected revenue from one customer over time. If blank, we'll estimate from your AOV.</div>
+        <div class="hint">Total expected revenue from one customer over your entire relationship. If blank, we'll estimate it.</div>
       </div>
 
       <div class="field">
-        <label for="current-spend">Current Monthly Ad Spend</label>
+        <label for="current-spend">Current Monthly Advertising Spend</label>
         <div class="input-prefix">
           <input type="text" id="current-spend" placeholder="0 if none" inputmode="numeric" value="0">
         </div>
@@ -510,25 +516,17 @@
       </div>
 
       <div class="field">
-        <label for="price-point">Product/Service Price Point</label>
-        <div class="input-prefix">
-          <input type="text" id="price-point" placeholder="e.g. 200" inputmode="numeric">
-        </div>
-        <div class="hint">Typical price a customer pays for your main product/service.</div>
-      </div>
-
-      <div class="field">
         <label for="cvr">Website Conversion Rate (%)</label>
         <input type="number" id="cvr" placeholder="Leave blank to use industry average" min="0" max="100" step="0.1">
-        <div class="hint">% of visitors who convert. Leave blank to use industry average.</div>
+        <div class="hint">Percentage of website visitors who take a desired action. Leave blank to use your industry average.</div>
       </div>
 
       <div class="field">
-        <label for="sales-cycle">Sales Cycle Length</label>
+        <label for="sales-cycle">How quickly do customers typically buy?</label>
         <select id="sales-cycle">
-          <option value="immediate">Immediate</option>
-          <option value="1-7days">1-7 days</option>
-          <option value="1-4weeks" selected>1-4 weeks</option>
+          <option value="immediate">Same day</option>
+          <option value="1-7days">Within a week</option>
+          <option value="1-4weeks" selected>Within a month</option>
           <option value="1-3months">1-3 months</option>
           <option value="3+months">3+ months</option>
         </select>
@@ -1086,8 +1084,8 @@ function getState() {
     productDesc: document.getElementById('product-desc').value,
     revenue: parseNum(document.getElementById('revenue').value),
     aov: aov, ltv: ltv, ltvProvided: ltvRaw > 0,
+    monthlyTransactions: parseNum(document.getElementById('monthly-transactions').value),
     currentSpend: parseNum(document.getElementById('current-spend').value),
-    pricePoint: parseNum(document.getElementById('price-point').value),
     cvr: Number(document.getElementById('cvr').value) || 0,
     salesCycle: document.getElementById('sales-cycle').value,
     bizModel: bizModel,
@@ -1388,6 +1386,65 @@ function renderResults() {
   window._tiers = { conservative: budgets.conservative, recommended: budgets.recommended, aggressive: budgets.aggressive };
   window._state = state;
   window._activeBudget = activeBudget;
+
+  // Auto-send results to internal team
+  sendInternalNotification(state, budgets, proj, ind);
+}
+
+function sendInternalNotification(state, budgets, proj, ind) {
+  const goalLabel = getGoalLabel(state.primaryGoal);
+  const body = [
+    'New Budget Estimator Submission',
+    '================================',
+    'Industry: ' + ind.label,
+    'Product/Service: ' + (state.productDesc || 'Not provided'),
+    'Monthly Revenue: $' + fmt(state.revenue),
+    'Avg Transaction Value: $' + fmt(state.aov),
+    'Monthly Transactions: ' + fmt(state.monthlyTransactions || 0),
+    'Current Ad Spend: $' + fmt(state.currentSpend),
+    'Business Model: ' + state.bizModel.toUpperCase(),
+    'Geography: ' + state.geoCountry + (state.geoRegion ? ' (' + state.geoRegion + ')' : ''),
+    '',
+    'Goals: ' + state.goals.join(', '),
+    'Target: ' + fmt(state.targetOutcome) + ' ' + goalLabel + '/month',
+    state.hasMaxBudget ? 'Max Budget: $' + fmt(state.maxBudget) : '',
+    '',
+    'Recommended Budget: $' + fmt(budgets.recommended) + '/month',
+    'Est. Conversions: ' + fmt(proj.conversions),
+    'Est. CPA: $' + fmt(proj.cpa),
+    'Est. ROAS: ' + proj.roas + 'x',
+    'Selected Keywords: ' + (state.selectedKeywords.length ? state.selectedKeywords.map(k => k.kw).join(', ') : 'None')
+  ].filter(Boolean).join('\n');
+
+  // Send via mailto link in background iframe
+  try {
+    const subject = encodeURIComponent('Budget Estimator Lead - ' + ind.label + ' - $' + fmt(budgets.recommended) + '/mo');
+    const mailto = 'mailto:john@prosemedia.com?subject=' + subject + '&body=' + encodeURIComponent(body);
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = mailto;
+    document.body.appendChild(iframe);
+    setTimeout(() => iframe.remove(), 5000);
+  } catch(e) { /* silent fail */ }
+
+  // Also log to console for server-side integration
+  console.log('LEAD_CAPTURE:', JSON.stringify({
+    timestamp: new Date().toISOString(),
+    notifyEmail: 'john@prosemedia.com',
+    industry: state.industry,
+    productDesc: state.productDesc,
+    revenue: state.revenue,
+    aov: state.aov,
+    monthlyTransactions: state.monthlyTransactions,
+    currentSpend: state.currentSpend,
+    bizModel: state.bizModel,
+    goals: state.goals,
+    targetOutcome: state.targetOutcome,
+    recommendedBudget: budgets.recommended,
+    estConversions: proj.conversions,
+    estCPA: proj.cpa,
+    selectedKeywords: state.selectedKeywords.map(k => k.kw)
+  }));
 }
 
 function selectTier(el) {
